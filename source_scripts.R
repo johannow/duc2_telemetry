@@ -15,3 +15,6 @@ source("02_code/04_train_GAM_model.R")
 
 # Chunk 05
 source("02_code/05_create_env_grids_to_predict.R")
+
+# Chunk 06
+source("02_code/06_make_predictions.R")
