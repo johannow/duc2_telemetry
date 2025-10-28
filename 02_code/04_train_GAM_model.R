@@ -46,17 +46,31 @@ chunk03 <- chunk03 |>
 ## ----prep-model-df------------------------------------------------------------
 
 # Convert target to factor (if not yet)
+# chunk03_prep <- chunk03 |>
+#   dplyr::mutate(
+#     acoustic_detection = factor(acoustic_detection, levels = c(1, 0)), #tidymodels assume first level is level of interest
+#     habitat = as.factor(habitat)) |>
+#   sf::st_drop_geometry() |>
+#   dplyr::select(c(acoustic_detection,
+#                   min_dist_owf,
+#                   min_dist_shipwreck,
+#                   elevation,
+#                   sst,
+#                   lod)) # select the columns we use for the modelling
 chunk03_prep <- chunk03 |>
   dplyr::mutate(
-    acoustic_detection = factor(acoustic_detection, levels = c(1, 0)), #tidymodels assume first level is level of interest
     habitat = as.factor(habitat)) |>
   sf::st_drop_geometry() |>
   dplyr::select(c(acoustic_detection,
                   min_dist_owf,
                   min_dist_shipwreck,
-                  elevation,
+                  habitat,
                   sst,
-                  lod)) # select the columns we use for the modelling
+                  lod))%>%# select the columns we use for the modelling
+dplyr::mutate(min_dist_owf_scaled = scale(min_dist_owf)[,1],
+              min_dist_shipwreck_scaled = scale(min_dist_shipwreck)[,1],
+              sst_scaled = scale(sst)[,1],
+              lod_scaled = scale(lod)[,1])
 #Leave out habitat until NA is fixed, then also need to edit formula
 
 ## ----model-recipe-train-------------------------------------------------------
@@ -120,6 +134,32 @@ gam_fitted_model <- gam(acoustic_detection ~
                         method = "REML",
                         data = chunk03_prep)
 
+start_time <- Sys.time()
+# +- min
+gam_fitted_model <- gam(acoustic_detection ~
+                          s(min_dist_owf_scaled, k = 20, bs = "tp") +
+                          s(elevation_scaled, k = 10, bs = "tp") +
+                          s(sst_scaled, k = 10, bs = "tp")+
+                          s(lod_scaled, k = 10, bs = "cc") +
+                          s(min_dist_shipwreck_scaled, k = 20, bs = "tp"),
+                        family = "nb",
+                        method = "REML",
+                        data = chunk03_prep)
+end_time <- Sys.time()
+print(end_time - start_time)
+start_time <- Sys.time()
+# +- min
+gam_fitted_model <- gam(acoustic_detection ~
+                          s(min_dist_owf_scaled, k = 20, bs = "tp") +
+                          habitat +
+                          s(sst_scaled, k = 10, bs = "tp")+
+                          s(lod_scaled, k = 10, bs = "cc") +
+                          s(min_dist_shipwreck_scaled, k = 20, bs = "tp"),
+                        family = "nb",
+                        method = "REML",
+                        data = chunk03_prep)
+end_time <- Sys.time()
+print(end_time - start_time)
 ## ----save-results-------------------------------------------------------------
 # bundle and then save
 mod_bundle <- bundle::bundle(gam_fitted_model)

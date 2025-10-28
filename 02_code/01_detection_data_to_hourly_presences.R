@@ -75,8 +75,8 @@ base::saveRDS(detections_month, file.path(processed_dir, "detections_month.rds")
 animals <- base::readRDS("01_data/01_raw_data/animals.rds") 
 
 
-tags <- etn::get_tags(tag_serial_number = animals$tag_serial_number)
 
+tags <- base::readRDS("01_data/01_raw_data/tags.rds") 
 # make a simple dataframe with start and end date of each tag
 
 tags_start_end <-
@@ -108,23 +108,7 @@ stations <-
     dplyr::group_by(station_name) |>
     dplyr::summarise(deploy_latitude = deploy_latitude |> mean(na.rm = T),
                      deploy_longitude = deploy_longitude |> mean(na.rm = T))
-
-stations_days <- 
-  time_index |>
-    tidyr::crossing(station_name = stations$station_name)
-
-
-## ----detections-days----------------------------------------------------------
-# Merge detection data with station activity times
-detections_days <- 
-  detections_raw |>
-    dplyr::mutate(time = as.Date(date_time)) |>
-    dplyr::select(time, station_name) |>
-    dplyr::distinct() |>
-    dplyr::mutate(value_det = 1) # 1 for presence
-
-#detections_days |> slice_sample(n = 10) |> knitr::kable()
-
+base::saveRDS(stations, file.path(processed_dir, "stations.rds"))
 ## ----deployments-days---------------------------------------------------------
 deployments_days <-
   time_index |>
@@ -136,28 +120,24 @@ deployments_days <-
                             recover_date = as.Date(recover_date_time)),
     by = dplyr::join_by(between(time, deploy_date, recover_date)))|>
     dplyr::select(-c(deploy_date_time, recover_date_time, deploy_date, recover_date))
-
-#deployments_days |> dplyr::slice_sample(n = 10) |> knitr::kable()
+base::saveRDS(deployments_days, "01_data/02_processed_data/deployments_days.rds")
 
 
 ## ----merge-dataframes---------------------------------------------------------
-time_stations_deployments_detections <-
-  stations_days |>
-  left_join(detections_days, by = c("time", "station_name"))  |>
-  left_join(deployments_days, 
-    by = c("time", "station_name")) |>
-  dplyr::mutate(value = coalesce(value_det, value_deploy)) |>
-  dplyr::select(time, station_name, value) 
+detections_day <- left_join(deployments_days, detections_days, by = c("time", "station_name"))%>%
+  mutate(across(count, ~ replace_na(.,0)))%>%
+  dplyr::select(-value_deploy)
+detections_day <- left_join(detections_day, active_tags, by = "time")
+saveRDS(detections_day, file = "01_data/02_processed_data/detections_day.rds")
 
-# don't pivot but only retain actively listening stations
+#If we use counts per day instead
 output_chunk01 <- 
-  time_stations_deployments_detections |>
-      dplyr::filter(!is.na(value)) |>
-      dplyr::left_join(stations, by = join_by(station_name))
-    # tidyr::pivot_wider(names_from = station_name, values_from = value) 
+  detections_day |>
+  dplyr::left_join(stations, by = join_by(station_name))
+dplyr::left_join(active_tags, by = join_by(time))
 
 ## ----save-outputs-------------------------------------------------------------
 # as RDS
 base::saveRDS(output_chunk01, file.path(processed_dir, "output_chunk01.rds"))
-base::saveRDS(stations, file.path(processed_dir, "stations.rds"))
+
 

@@ -82,7 +82,7 @@ OWF_distance_stations <-
     mutate(min_dist_owf = st_distance(geometry, OWF) |>
             apply(1, min) |>
             units::set_units("m") |>  # optional: convert units
-            drop_units()) 
+            units::drop_units()) 
 
 
 chunk01_OWF <- 
@@ -101,7 +101,7 @@ shipwrecks_distance_stations <-
     mutate(min_dist_shipwreck = st_distance(geometry, shipwrecks) |>
             apply(1, min) |>
             units::set_units("m") |>  # optional: convert units
-            drop_units()) 
+            units::drop_units()) 
 
 chunk01_shipwrecks <- 
   chunk01 |>
