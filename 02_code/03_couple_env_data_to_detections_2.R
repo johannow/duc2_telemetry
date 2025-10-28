@@ -1,20 +1,16 @@
-##################################################################################
-##################################################################################
+# author: Lotte Pohl, lotte.pohl@vliz.be
+# purpose: couple environmental data to processed acoustic detections
 
-# Author: Lotte Pohl
-# Email: lotte.pohl@vliz.be
-# Date: 2025-09-26
-# Script Name: ~/duc42_ga/02_code/03_couple_env_data_to_detections.R
-# Script Description: couple environmental data to processed acoustic detections
-# SETUP ------------------------------------
-cat("\014")                          # Clears the console
-rm(list = ls())                      # Remove all variables of the work space
-source("02_code/folder_structure.R") # Create relative paths
+rm(list = ls()) # clear environment
 
-##################################################################################
-##################################################################################
+## ----folder-structure---------------------------------------------------------
+# Source preparation script to create relative paths
+## for now only folders right?
+
+source("02_code/folder_structure.R")
 
 ## ----R-packages---------------------------------------------------------------
+
 
 ## other
 library(dplyr)
@@ -69,6 +65,7 @@ bathy_rast <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
 
 habitats_rast <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
 
+# plot(habitats_rast)
 
 ## ----overlaps-OWF-------------------------------------------------------------
 # sf::sf_use_s2(FALSE)
@@ -177,7 +174,28 @@ rm(bathy_vals)
 # Extract habitat raster values
 habitats_vals <- 
     terra::extract(habitats_rast, terra::vect(chunk01)) |>
-     rename(row_id = ID)%>%distinct(row_id, .keep_all = TRUE)
+     rename(row_id = ID)
+
+habitats_vals |> summary()
+
+habitats_vals <- #habitats_vals |>
+    terra::extract(habitats_rast, terra::vect(chunk01)) |>
+        dplyr::rename(row_id = ID) |>
+        dplyr::group_by(row_id) |>
+        dplyr::summarise(
+            habitat = {
+            vals <- na.omit(c_across(where(is.numeric)))
+            if (length(vals) == 0) {
+                NA_integer_  # fallback for all-NA cases
+            } else {
+                freq_table <- table(as.character(vals))
+                modes <- names(freq_table)[freq_table == max(freq_table)]
+                as.integer(sample(modes, 1))  # return as integer
+            }
+            },
+            .groups = "drop"
+        )
+
 
 # Join bathy values back in
 chunk01_habitats <- 
