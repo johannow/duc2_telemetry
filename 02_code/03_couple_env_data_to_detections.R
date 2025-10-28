@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # author: Lotte Pohl, lotte.pohl@vliz.be
 # purpose: couple environmental data to processed acoustic detections
