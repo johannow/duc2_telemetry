@@ -66,6 +66,7 @@ bathy_rast <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
 
 habitats_rast <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
 
+# plot(habitats_rast)
 
 ## ----overlaps-OWF-------------------------------------------------------------
 # sf::sf_use_s2(FALSE)
@@ -176,6 +177,8 @@ habitats_vals <-
     terra::extract(habitats_rast, terra::vect(chunk01)) |>
      rename(row_id = ID)
 
+habitats_vals |> summary()
+
 habitats_vals <- #habitats_vals |>
     terra::extract(habitats_rast, terra::vect(chunk01)) |>
         dplyr::rename(row_id = ID) |>
@@ -193,6 +196,7 @@ habitats_vals <- #habitats_vals |>
             },
             .groups = "drop"
         )
+
 
 # Join bathy values back in
 chunk01_habitats <- 
