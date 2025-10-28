@@ -43,6 +43,17 @@ BPNS <-
 ### ----acoustic-detections--------------------------------------------------
 
 detections_raw <- base::readRDS("01_data/01_raw_data/detections.rds") 
+
+detections_days <- detections_raw %>%
+  dplyr::select(time = date_time,
+                animal_id,
+                deploy_latitude,
+                deploy_longitude,
+                station_name)%>%
+  dplyr::mutate(time = lubridate::date(time))%>%
+  group_by(time, station_name)%>%
+  distinct(animal_id)%>%
+  summarise(count = n())
             
 detections_month <- 
   detections_raw |>
@@ -59,6 +70,24 @@ detections_month <-
 # save the monthly detections dataframe
 base::saveRDS(detections_month, file.path(processed_dir, "detections_month.rds"))
 
+### ----animals--------------------------------------------------
+
+animals <- base::readRDS("01_data/01_raw_data/animals.rds") 
+
+
+tags <- etn::get_tags(tag_serial_number = animals$tag_serial_number)
+
+# make a simple dataframe with start and end date of each tag
+
+tags_start_end <-
+  animals |> 
+  dplyr::select(tag_serial_number, tag_date) |>
+  dplyr::left_join(tags |> 
+                     # only keep one row per tag_serial_number
+                     dplyr::distinct(tag_serial_number, battery_estimated_end_date) ) |>
+  dplyr::mutate(battery_estimated_end_date = as.Date(battery_estimated_end_date)) |>
+  dplyr::rename(tag_start = tag_date,
+                tag_end = battery_estimated_end_date)
 
 ### ----acoustic_deployments-------------------------------------------------
 
