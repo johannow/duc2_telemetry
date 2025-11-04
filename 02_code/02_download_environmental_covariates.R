@@ -16,32 +16,6 @@ source("02_code/folder_structure.R") # Create relative paths
 
 ## ----R-packages---------------------------------------------------------------
 
-# options(repos = c(CRAN = "https://cloud.r-project.org"))
-# if (!requireNamespace("rerddap", quietly = TRUE)) {
-#   install.packages("rerddap")
-# }
-
-# if (!requireNamespace("tidyterra", quietly = TRUE)) {
-#   install.packages("tidyterra")
-# }
-
-# if (!requireNamespace("emodnet.wfs", quietly = TRUE)) {
-# #   install.packages("emodnet.wfs")
-#   install.packages("emodnet.wfs", repos = c("https://ropensci.r-universe.dev", "https://cloud.r-project.org"))
-# }
-
-
-## ----load-packages------------------------------------------------------------
-
-# unsure still how .renv works with loading packages - so for now loading them like this - change in the future
-# install.packages("emodnet.wfs", repos = c("https://ropensci.r-universe.dev", "https://cloud.r-project.org"))
-
-# remotes::install_github("ropensci/rerddap")
-
-## For CMEMS data import
-# install.packages("CopernicusMarine")  # For CMEMS data access
-# install.packages("ncdf4")            # For netCDF file handling
-# install.packages("reticulate") 
 library(reticulate)
 library(CopernicusMarine)
 library(ncdf4)
@@ -55,14 +29,13 @@ library(lubridate)
 library(sf)
 library(terra)
 
-#setwd("C:/Users/lotte.pohl/OneDrive - VLIZ/Documents/repositories/dto-bioflow_wp4_duc2/02_code/01_boosted_regression_trees") # set working directory to the folder where the script is located -> same as qmd rendering
-
 ## ----geospatial-data----------------------------------------------------------
-# BPNS
+# Belgian Part of the North Sea (BPONS) = study area
 BPNS <- 
   sf::st_read(file.path(raw_dir, "BPNS.gpkg")) 
 
 ## ----variables----------------------------------------------------------------
+# Now we set the bounding box and the start and end data for our datasets
 lon_min <- 2.2
 lon_max <- 3.4
 lat_min <- 51
