@@ -102,6 +102,19 @@ time_index <-
     to = as.Date(end),
     by = "day"))
 
+active_tags <- time_index |>
+  mutate(
+    n_active_tags = rowSums(
+      outer(time, tags_start_end$tag_start, `>=`) &
+        outer(time, tags_start_end$tag_end, `<=`)
+    )
+  )
+
+active_tags_month <- active_tags%>%
+  dplyr::mutate(year_month = format(floor_date(time, "month"), "%Y-%m"))%>%
+  group_by(year_month)%>%
+  summarize(n_active_tags = sum(n_active_tags))
+
 ## ----stations-days------------------------------------------------------------
 stations <- 
   deployments |>
@@ -134,7 +147,6 @@ saveRDS(detections_day, file = "01_data/02_processed_data/detections_day.rds")
 output_chunk01 <- 
   detections_day |>
   dplyr::left_join(stations, by = join_by(station_name))
-dplyr::left_join(active_tags, by = join_by(time))
 
 ## ----save-outputs-------------------------------------------------------------
 # as RDS

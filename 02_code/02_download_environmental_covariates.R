@@ -42,8 +42,9 @@ source("02_code/folder_structure.R") # Create relative paths
 # install.packages("CopernicusMarine")  # For CMEMS data access
 # install.packages("ncdf4")            # For netCDF file handling
 # install.packages("reticulate") 
+
 library(reticulate)
-library(CopernicusMarine)
+
 library(ncdf4)
 library(dplyr)
 library(knitr)
@@ -213,18 +214,20 @@ output_path <- processed_dir
 
 # following this tutorial: https://help.marine.copernicus.eu/en/articles/8638253-how-to-download-data-via-the-copernicus-marine-toolbox-in-r
 library(reticulate)
-
 #step1: virtual environment
-virtualenv_create(envname = "CopernicusMarine")
+virtualenv_create(envname = "CopernicusMarine", force = FALSE)
 
-# # only 1st time
-# virtualenv_install("CopernicusMarine", packages = c("copernicusmarine"))
+if("copernicusmarine" %in% reticulate::py_list_packages("CopernicusMarine")$package){
+  print("copernicusmarine package already installed")
+} else {
+  virtualenv_install("CopernicusMarine", packages = c("copernicusmarine"))
+}
+use_virtualenv("CopernicusMarine", required = TRUE)
+cmt <- reticulate::import("copernicusmarine")
 
-reticulate::use_virtualenv("CopernicusMarine", required = TRUE)
+# Absolute path to the CopMC python binary
 
-cmt <- import("copernicusmarine")
-# log in
-
+#login
 
 # query the data
 cmt$subset(
