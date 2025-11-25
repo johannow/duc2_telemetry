@@ -2,8 +2,8 @@ raw_dir      <- file.path("01_data", "01_raw_data")
 processed_dir<- file.path("01_data", "02_processed_data")
 code_dir <- file.path("02_code")
 func_dir     <- file.path("04_functions")
-mod_dir  <- file.path("03_results", "01_models")
-pred_dir  <- file.path("03_results", "02_predictions")
+mod_dir  <- file.path("05_results", "01_models")
+pred_dir  <- file.path("05_results", "02_predictions")
 
 folder_struct <- c(raw_dir,
                  processed_dir,

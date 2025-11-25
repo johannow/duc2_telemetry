@@ -16,6 +16,8 @@ source("02_code/01_detection_data_to_hourly_presences.R")
 ```
 
 ```{r}
+cmems_username <- "EDIT THIS WITH CMEMS USERNAME"
+cmems_password <- "EDIT THIS WITH CMEMS PASSWORD"
 source("02_code/02_download_environmental_covariates.R")
 
 ```
