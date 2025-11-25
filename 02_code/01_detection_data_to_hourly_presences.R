@@ -16,32 +16,22 @@
 ##################################################################################
 
 ## ----load-packages------------------------------------------------------------
-# unsure still how .renv works with loading packages - 
-#so for now loading them like this - change in the future
-
-# install.packages(c("mregions2", "knitr", "dplyr", 
-# "remotes", "leaflet", "sf", "ggplot2", "plotly"))
-# remotes::install_github("inbo/etn@v2.3-beta", force = TRUE)
-
 library(dplyr)
 library(knitr)
 library(tidyr)
 library(lubridate)
 library(sf)
-# getwd()
 
 ## ----parameters----------------------------------------------------------------
 start <- "2021-01-01"
 end <- "2022-12-31"
 
 ## ----read raw data----------------------------------------------------------------
-
 # Belgian EEZ --> will be the bounding box
 BPNS <- 
   sf::st_read(file.path(raw_dir, "BPNS.gpkg")) 
 
 ### ----acoustic-detections--------------------------------------------------
-
 detections_raw <- base::readRDS("01_data/01_raw_data/detections.rds") 
 
 detections_days <- detections_raw %>%
@@ -75,10 +65,9 @@ base::saveRDS(detections_month, file.path(processed_dir, "detections_month.rds")
 animals <- base::readRDS("01_data/01_raw_data/animals.rds") 
 
 
-
 tags <- base::readRDS("01_data/01_raw_data/tags.rds") 
-# make a simple dataframe with start and end date of each tag
 
+# make a simple dataframe with start and end date of each tag
 tags_start_end <-
   animals |> 
   dplyr::select(tag_serial_number, tag_date) |>
@@ -143,7 +132,6 @@ detections_day <- left_join(deployments_days, detections_days, by = c("time", "s
 detections_day <- left_join(detections_day, active_tags, by = "time")
 saveRDS(detections_day, file = "01_data/02_processed_data/detections_day.rds")
 
-#If we use counts per day instead
 output_chunk01 <- 
   detections_day |>
   dplyr::left_join(stations, by = join_by(station_name))
@@ -151,5 +139,3 @@ output_chunk01 <-
 ## ----save-outputs-------------------------------------------------------------
 # as RDS
 base::saveRDS(output_chunk01, file.path(processed_dir, "output_chunk01.rds"))
-
-
