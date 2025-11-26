@@ -5,6 +5,18 @@ format: html
 editor: visual
 ---
 
+## Setup
+
+First activate the R project by clicking on the `duc42_ga.Rproj` file. The packages necessary for this tutorial are listed in `renv.lock`. We can rebuild this necessary environment by running the code below and afterwards re-starting the R session by pressing the red button in the top right corner. 
+
+```{r}
+renv::restore(rebuild = FALSE)
+
+#Answer "y" when asked to confirm
+```
+
+Re-start the R session by pressing the red button in the top right corner.
+
 ## Script1
 
 In the first script the acoustic telemetry data is downloaded.
