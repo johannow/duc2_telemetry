@@ -1,0 +1,59 @@
+---
+title: "Overview_script"
+author: "Lotte Pohl and Jo-Hannes Nowé (VLIZ)"
+format: html
+editor: visual
+---
+
+## Setup
+
+First activate the R project by clicking on the `duc42_ga.Rproj` file. The packages necessary for this tutorial are listed in `renv.lock`. We can rebuild this necessary environment by running the code below and afterwards re-starting the R session by pressing the red button in the top right corner. 
+
+```{r}
+renv::restore(rebuild = FALSE)
+
+#Answer "y" when asked to confirm
+```
+
+Re-start the R session by pressing the red button in the top right corner.
+
+## Script1
+
+In the first script the acoustic telemetry data is downloaded.
+
+A dataframe is created based on the raw data with daily information on the amount of counts of distinct fish at different stations with their respective longitude and latitude. Also the amount of total active tags in the water on a given day is given as this biases the count information.
+
+```{r}
+source("02_code/01_detection_data_to_hourly_presences.R")
+```
+
+```{r}
+cmems_username <- "EDIT THIS WITH CMEMS USERNAME"
+cmems_password <- "EDIT THIS WITH CMEMS PASSWORD"
+source("02_code/02_download_environmental_covariates.R")
+
+```
+
+```{r}
+# Chunk 03
+source("02_code/03_couple_env_data_to_detections.R")
+
+
+```
+
+```{r}
+# Chunk 04
+source("02_code/04_train_GAM_model.R")
+```
+
+```{r}
+# Chunk 05
+source("02_code/05_create_env_grids_to_predict.R")
+
+
+```
+
+```{r}
+# Chunk 06
+source("02_code/06_make_predictions.R")
+```

@@ -24,10 +24,9 @@ library(tidyr)
 # library(etn)
 library(lubridate)
 library(units)
-#library(mregions2)
 library(sf)
 library(terra)
-library(tidyterra)
+
 
 
 ## ----load-detections----------------------------------------------------------

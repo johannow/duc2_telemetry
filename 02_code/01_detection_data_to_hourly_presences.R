@@ -16,19 +16,11 @@
 ##################################################################################
 
 ## ----load-packages------------------------------------------------------------
-# unsure still how .renv works with loading packages - 
-#so for now loading them like this - change in the future
-
-# install.packages(c("mregions2", "knitr", "dplyr", 
-# "remotes", "leaflet", "sf", "ggplot2", "plotly"))
-# remotes::install_github("inbo/etn@v2.3-beta", force = TRUE)
-
 library(dplyr)
 library(knitr)
 library(tidyr)
 library(lubridate)
 library(sf)
-# getwd()
 
 ## ----parameters----------------------------------------------------------------
 # First, we define our study period, namely our start and end date
@@ -175,5 +167,3 @@ output_chunk01 <-
 ## ----save-outputs-------------------------------------------------------------
 # as RDS
 base::saveRDS(output_chunk01, file.path(processed_dir, "output_chunk01.rds"))
-
-

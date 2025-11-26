@@ -35,8 +35,6 @@ shipwreck_dist <- terra::rast(file.path(processed_dir, "shipwreck_dist_rast.nc")
 sst <- terra::rast(file.path(processed_dir, "sst_rast.nc"))
 
 ## ----prediction-function------------------------------------------------------
-#Function to use in the terra::predict()
-predprob <- function(...) predict(...,type="prob")$.pred_1
 
 ## ----predict------------------------------------------------------------------
 bathy <- terra::resample(bathy, sst) #need to align to allow predictions
@@ -55,6 +53,7 @@ predictions <- list()
 predictions_all_owf <- list()
 diff_owf <- list()
   # make monthly predictions
+
   for(i in 1:nlyr(sst)){
     predictors <- c(bathy, sst[[i]], lod2[[i]], OWF_dist, shipwreck_dist)
     predictors_all_owf <- c(bathy, sst[[i]], lod2[[i]], r_zero, shipwreck_dist) #use a raster with distance to OWF = 0 to mimick all OWF
@@ -62,8 +61,8 @@ diff_owf <- list()
     names(predictors_all_owf) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck")
   
     # Predict
-    predictions[[i]] <- terra::predict(predictors, model = model, fun = predprob)
-    predictions_all_owf[[i]] <- terra::predict(predictors_all_owf, model = model, fun = predprob)
+    predictions[[i]] <- terra::predict(predictors, model = model)
+    predictions_all_owf[[i]] <- terra::predict(predictors_all_owf, model = model)
     
     #the difference in suitability when a owf everywhere
     diff_owf[[i]] <- predictions_all_owf[[i]] - predictions[[i]]
