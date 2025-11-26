@@ -44,6 +44,9 @@ lat_max <- 51.9
 start <- "2021-01-01"
 end <- "2022-12-31"
 
+# ----load-environmental-data---------------------------------------------------
+# Now, we load and query various environmental data sources
+
 ## ----shipwrecks---------------------------------------------------------------
 
 shipwrecks <- 
@@ -51,16 +54,17 @@ shipwrecks <-
         dplyr::select(Easting, Northing, `Gezonken op`, Code, Bouwjaar) |>
         sf::st_as_sf(coords = c("Easting", "Northing"), crs = 32631) |>
         sf::st_transform(4326) |>
-    dplyr::bind_cols(
-        readr::read_delim(file.path(raw_dir, "wreck-export.csv"), delim = ";", escape_double = FALSE, trim_ws = TRUE) |>
-        dplyr::select(Easting, Northing) |>
-        sf::st_as_sf(coords = c("Easting", "Northing"), crs = 32631) |>
-        sf::st_transform(4326) |>
-        sf::st_coordinates() |> # Extract coordinates as a matrix |>
-        tidyr::as_tibble() |> # Convert coordinates matrix to tibble
-        dplyr::rename(lon = X, lat = Y))
+        dplyr::bind_cols(
+          readr::read_delim(file.path(raw_dir, "wreck-export.csv"), delim = ";", escape_double = FALSE, trim_ws = TRUE) |>
+          dplyr::select(Easting, Northing) |>
+          sf::st_as_sf(coords = c("Easting", "Northing"), crs = 32631) |>
+          sf::st_transform(4326) |>
+          sf::st_coordinates() |> # Extract coordinates as a matrix |>
+          tidyr::as_tibble() |> # Convert coordinates matrix to tibble
+          dplyr::rename(lon = X, lat = Y))
 
 
+# EMODnet Human Activities Layers
 ## ----wfs-human----------------------------------------------------------------
 # initiate WFS client
 wfs_human <- emodnet.wfs::emodnet_init_wfs_client(service = "human_activities")

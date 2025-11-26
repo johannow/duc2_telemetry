@@ -20,25 +20,14 @@ source("02_code/folder_structure.R") # Create relative paths
 library(dplyr)
 library(knitr)
 library(readr)
-#library(emodnet.wfs)
-#library(rerddap)
 library(tidyr)
 # library(etn)
-#library(purrr)
 library(lubridate)
-# library(mapview)
 library(units)
-#library(leaflet)
 #library(mregions2)
 library(sf)
 library(terra)
 library(tidyterra)
-#library(lwgeom)
-#library(giscoR)
-#library(ggplot2)
-#library(plotly)
-
-# knit_exit()
 
 
 ## ----load-detections----------------------------------------------------------

@@ -84,22 +84,23 @@ model_recipe <- recipes::recipe(acoustic_detection ~ ., data = chunk03_prep) |>
 
 
 ## ----gam-model-formulation----------------------------------------------------
-gam_wf <- 
-  workflow() %>%
-  add_recipe(model_recipe) %>%            # assume model_recipe pre‐processes habitat etc.
-  add_model(
-    gen_additive_mod() %>%
-      set_engine(
-        "mgcv",
-        family = binomial(link = "logit"),
-        method = "REML") %>%
-      set_mode("classification"),
-    formula = acoustic_detection ~
-      s(min_dist_owf, k = 20, bs = "tp") +
-      s(elevation, k = 10, bs = "tp") +
-      te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
-      s(min_dist_shipwreck, k = 20, bs = "tp")
-  )
+### OLD, this is from the tidymodels approach
+# gam_wf <- 
+#   workflow() %>%
+#   add_recipe(model_recipe) %>%            # assume model_recipe pre‐processes habitat etc.
+#   add_model(
+#     gen_additive_mod() %>%
+#       set_engine(
+#         "mgcv",
+#         family = binomial(link = "logit"),
+#         method = "REML") %>%
+#       set_mode("classification"),
+#     formula = acoustic_detection ~
+#       s(min_dist_owf, k = 20, bs = "tp") +
+#       s(elevation, k = 10, bs = "tp") +
+#       te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
+#       s(min_dist_shipwreck, k = 20, bs = "tp")
+#   )
 
 ## ----fit-model----------------------------------------------------------------
 start_time <- Sys.time()
@@ -111,14 +112,14 @@ print(end_time - start_time)
 library(mgcv)
 start_time <- Sys.time()
 # +- 4min
-gam_fitted_model <- gam(acoustic_detection ~
-                          s(min_dist_owf, k = 20, bs = "tp") +
-                          s(elevation, k = 10, bs = "tp") +
-                          te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
-                          s(min_dist_shipwreck, k = 20, bs = "tp"),
-                        family = "binomial",
-                        method = "REML",
-                        data = chunk03_prep)
+gam_fitted_model <- mgcv::gam(acoustic_detection ~
+                              s(min_dist_owf, k = 20, bs = "tp") +
+                              s(elevation, k = 10, bs = "tp") +
+                              te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
+                              s(min_dist_shipwreck, k = 20, bs = "tp"),
+                            family = "binomial",
+                            method = "REML",
+                            data = chunk03_prep)
 end_time <- Sys.time()
 print(end_time - start_time)
 #5min
