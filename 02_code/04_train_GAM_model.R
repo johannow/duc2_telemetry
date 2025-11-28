@@ -48,57 +48,6 @@ chunk03 <- chunk03 |>
 #                   elevation,
 #                   sst,
 #                   lod)) # select the columns we use for the modelling
-chunk03_prep <- chunk03 |>
-  dplyr::mutate(
-    habitat = as.factor(habitat)) |>
-  sf::st_drop_geometry() |>
-  dplyr::select(c(acoustic_detection,
-                  min_dist_owf,
-                  min_dist_shipwreck,
-                  habitat,
-                  sst,
-                  lod))%>%# select the columns we use for the modelling
-dplyr::mutate(min_dist_owf_scaled = scale(min_dist_owf)[,1],
-              min_dist_shipwreck_scaled = scale(min_dist_shipwreck)[,1],
-              sst_scaled = scale(sst)[,1],
-              lod_scaled = scale(lod)[,1])
-#Leave out habitat until NA is fixed, then also need to edit formula
-
-## ----model-recipe-train-------------------------------------------------------
-
-model_recipe <- recipes::recipe(acoustic_detection ~ ., data = chunk03_prep) |> 
-  step_normalize( # use 'normalize' instead of 'scale' to have all variables centered around the mean
-    all_numeric_predictors()) #The columns created with the step_novel have zero variance and cannot be scaled. 
-#recipes::step_novel(habitat) |> #ensures that habitat classes not found during training will be turned to NA during predicting
-#recipes::step_unknown(habitat) |> #ensures the model knows how to deal with NA values
-#step_dummy(all_nominal_predictors(), one_hot = TRUE) #one_hot = true ensures that all variables get their own dummy
-
-
-## ----gam-model-formulation----------------------------------------------------
-### OLD, this is from the tidymodels approach
-# gam_wf <- 
-#   workflow() %>%
-#   add_recipe(model_recipe) %>%            # assume model_recipe pre‐processes habitat etc.
-#   add_model(
-#     gen_additive_mod() %>%
-#       set_engine(
-#         "mgcv",
-#         family = binomial(link = "logit"),
-#         method = "REML") %>%
-#       set_mode("classification"),
-#     formula = acoustic_detection ~
-#       s(min_dist_owf, k = 20, bs = "tp") +
-#       s(elevation, k = 10, bs = "tp") +
-#       te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
-#       s(min_dist_shipwreck, k = 20, bs = "tp")
-#   )
-
-## ----fit-model----------------------------------------------------------------
-start_time <- Sys.time()
-# +- 4min
-gam_fitted_model <- fit(gam_wf, data = chunk03_prep)
-end_time <- Sys.time()
-print(end_time - start_time)
 
 library(mgcv)
 # start_time <- Sys.time()
@@ -115,38 +64,12 @@ library(mgcv)
 # print(end_time - start_time)
 
 start_time <- Sys.time()
-# +- 4min
-gam_fitted_model <- mgcv::gam(acoustic_detection ~
-                              s(min_dist_owf, k = 20, bs = "tp") +
-                              s(elevation, k = 10, bs = "tp") +
-                              te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
-                              s(min_dist_shipwreck, k = 20, bs = "tp"),
-                            family = "binomial",
-                            method = "REML",
-                            data = chunk03_prep)
-end_time <- Sys.time()
-print(end_time - start_time)
-#5min
-summary(gam_fitted_model)
-plot(gam_fitted_model,)
+# +- min
 gam_fitted_model <- gam(acoustic_detection ~
                           s(min_dist_owf, k = 20, bs = "tp") +
                           s(elevation, k = 10, bs = "tp") +
-                          s(sst, k = 10, bs = "tp")+
-                          s(lod, k = 10, bs = "cc") +
+                          te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
                           s(min_dist_shipwreck, k = 20, bs = "tp"),
-                        family = "binomial",
-                        method = "REML",
-                        data = chunk03_prep)
-
-start_time <- Sys.time()
-# +- min
-gam_fitted_model <- gam(acoustic_detection ~
-                          s(min_dist_owf_scaled, k = 20, bs = "tp") +
-                          s(elevation_scaled, k = 10, bs = "tp") +
-                          s(sst_scaled, k = 10, bs = "tp")+
-                          s(lod_scaled, k = 10, bs = "cc") +
-                          s(min_dist_shipwreck_scaled, k = 20, bs = "tp"),
                         family = "nb",
                         method = "REML",
                         data = chunk03)

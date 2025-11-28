@@ -23,62 +23,51 @@ library(lubridate)
 library(sf)
 
 ## ----parameters----------------------------------------------------------------
-# First, we define our study period, namely our start and end date
 start <- "2021-01-01"
 end <- "2022-12-31"
 
 ## ----read raw data----------------------------------------------------------------
-
-### ----Belgian EEZ--------------------------------------------------
-# Since for now our study area is the Belgian Part of the North Sea, it will be the bounding box
+# Belgian EEZ --> will be the bounding box
 BPNS <- 
   sf::st_read(file.path(raw_dir, "BPNS.gpkg")) 
 
 ### ----acoustic-detections--------------------------------------------------
-
-# These are the 'raw' acoustic detections, as accessed via the etn R package (https://github.com/inbo/etn)
 detections_raw <- base::readRDS("01_data/01_raw_data/detections.rds") 
 
-# Now, we summarise the detection data per day and get the number of unique individuals detected at each acoustic receiver station.
-detections_days <- detections_raw |>
+detections_days <- detections_raw %>%
   dplyr::select(time = date_time,
                 animal_id,
                 deploy_latitude,
                 deploy_longitude,
-                station_name)|>
-  dplyr::mutate(time = lubridate::date(time))|>
-  group_by(time, station_name)|>
-  distinct(animal_id)|>
+                station_name)%>%
+  dplyr::mutate(time = lubridate::date(time))%>%
+  group_by(time, station_name)%>%
+  distinct(animal_id)%>%
   summarise(count = n())
-
-
-# Now, we summarise the detection data per month and get the number of unique individuals detected at each acoustic receiver station.     
+            
 detections_month <- 
   detections_raw |>
       dplyr::mutate(
        month = lubridate::month(date_time))  |>
       dplyr::group_by(month, station_name) |>
       dplyr::summarise(n_dets = dplyr::n(), .groups = "drop",
-      n_animals = n_distinct(animal_id) |> as.integer(),
+      n_animals = n_distinct(animal_id) %>% as.integer(),
       lat = deploy_latitude |> mean(na.rm = T),
       lon = deploy_longitude |> mean(na.rm = T)) |>
   # make into sf object
-  sf::st_as_sf(coords = c("lon", "lat"), crs = 4326) |>
-  # ensure we have POINT and not MULTIPOINT data
-  sf::st_cast("POINT")
+  sf::st_as_sf(coords = c("lon", "lat"), crs = 4326) 
 
 # save the monthly detections dataframe
 base::saveRDS(detections_month, file.path(processed_dir, "detections_month.rds"))
 
 ### ----animals--------------------------------------------------
 
-# These are the animal metadata, as accessed via the etn R package (https://github.com/inbo/etn)
 animals <- base::readRDS("01_data/01_raw_data/animals.rds") 
 
-# These are the tag metadata, as accessed via the etn R package (https://github.com/inbo/etn)
-tags <- base::readRDS("01_data/01_raw_data/tags.rds")
 
-# Now we make a simple dataframe with start and end date of each tag
+tags <- base::readRDS("01_data/01_raw_data/tags.rds") 
+
+# make a simple dataframe with start and end date of each tag
 tags_start_end <-
   animals |> 
   dplyr::select(tag_serial_number, tag_date) |>
@@ -90,7 +79,7 @@ tags_start_end <-
                 tag_end = battery_estimated_end_date)
 
 ### ----acoustic_deployments-------------------------------------------------
-# These are the acoustic deployment metadata, as accessed via the etn R package (https://github.com/inbo/etn)
+
 deployments <-
   base::readRDS(file.path(raw_dir, "deployments.rds"))
 
@@ -102,8 +91,6 @@ time_index <-
     to = as.Date(end),
     by = "day"))
 
-## ----active-tags-per-time-index--------------------------------------------------------
-# Get the number of active tags per timestep (to later use as parameter in the model)
 active_tags <- time_index |>
   mutate(
     n_active_tags = rowSums(
@@ -112,25 +99,19 @@ active_tags <- time_index |>
     )
   )
 
+active_tags_month <- active_tags%>%
+  dplyr::mutate(year_month = format(floor_date(time, "month"), "%Y-%m"))%>%
+  group_by(year_month)%>%
+  summarize(n_active_tags = sum(n_active_tags))
+
 ## ----stations-days------------------------------------------------------------
-# Now, we make a dataframe summarising each receiver station into one row
 stations <- 
   deployments |>
-    sf::st_drop_geometry() |>
     dplyr::group_by(station_name) |>
-    dplyr::summarise(lat = deploy_latitude |> mean(na.rm = T),
-                     lon = deploy_longitude |> mean(na.rm = T)) |>
-  # make into sf object
-  sf::st_as_sf(coords = c("lon", "lat"), crs = 4326) |>
-  # ensure we have POINT and not MULTIPOINT data
-  sf::st_cast("POINT")
-
+    dplyr::summarise(deploy_latitude = deploy_latitude |> mean(na.rm = T),
+                     deploy_longitude = deploy_longitude |> mean(na.rm = T))
 base::saveRDS(stations, file.path(processed_dir, "stations.rds"))
-
 ## ----deployments-days---------------------------------------------------------
-
-# Now, use the time_index df together with the deployments df to create a new df
-# with 1 row per timestep and station
 deployments_days <-
   time_index |>
     dplyr::left_join(deployments |>
@@ -141,28 +122,19 @@ deployments_days <-
                             recover_date = as.Date(recover_date_time)),
     by = dplyr::join_by(between(time, deploy_date, recover_date)))|>
     dplyr::select(-c(deploy_date_time, recover_date_time, deploy_date, recover_date))
-
 base::saveRDS(deployments_days, "01_data/02_processed_data/deployments_days.rds")
 
 
 ## ----merge-dataframes---------------------------------------------------------
-
-# We replace the initial 0 with the count of animals for that day at that station
-
-detections_day <- 
-  deployments_days |>
-  dplyr::left_join(detections_days, by = c("time", "station_name")) |>
-  dplyr::mutate(count = tidyr::replace_na(count, 0)) |>
-  dplyr::select(time, station_name, count)
-
-
+detections_day <- left_join(deployments_days, detections_days, by = c("time", "station_name"))%>%
+  mutate(across(count, ~ replace_na(.,0)))%>%
+  dplyr::select(-value_deploy)
+detections_day <- left_join(detections_day, active_tags, by = "time")
 saveRDS(detections_day, file = "01_data/02_processed_data/detections_day.rds")
 
-#Join with information on location and active tags
 output_chunk01 <- 
   detections_day |>
-  dplyr::left_join(stations, by = join_by(station_name)) |>
-  dplyr::left_join(active_tags, by = join_by(time))
+  dplyr::left_join(stations, by = join_by(station_name))
 
 ## ----save-outputs-------------------------------------------------------------
 # as RDS
