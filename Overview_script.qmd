@@ -2,72 +2,12 @@
 title: "Overview_script"
 author: "Lotte Pohl and Jo-Hannes Nowé (VLIZ)"
 format: html
-editor: source
+editor: visual
 ---
 
-# 📄 Introduction
+## Setup
 
-This Tutorial walks through the steps needed to create a raster layer showing Offshore Wind Farm impacts on the presence of fish. 
-
-* Acoustic telemetry data from the [European Tracking Network (ETN)](europeantrackingnetwork.org), and environmental variables from [EMODnet Human Activities](https://emodnet.ec.europa.eu/en/human-activities) and [Copernicus Marine Service](https://marine.copernicus.eu) are used.
-
-* This walkthrough explains data access, preprocessing, and using the preprocessed data in a GAM modelling workflow. 
-
-* The generated raster layer is used in Demonstrator Use Case (DUC) 2 of the [DTO-Bioflow project](https://dto-bioflow.eu). 
-More information about the DUC can be found on the [project website](https://dto-bioflow.eu/use-cases/duc-2-impact-offshore-infrastructures) and on the [DUC 2 factsheet](https://zenodo.org/records/17485552). [This repository](https://github.com/johannow/duc2_telemetry) covers the acoustic telemetry component of DUC2. Other components developed as part of DUC2 can be found in this github repository: [https://github.com/AU-ECOS-MM/DTO_DUC2](https://github.com/AU-ECOS-MM/DTO_DUC2).
-
-## 🐟 Study area and species 
-
-[European seabass](https://www.marinespecies.org/aphia.php?p=taxdetails&id=126975) (*Dicentrarchus labrax*) is the fish species of interest for DUC2 for the time being. The study area is the [Belgian Part of the North Sea](https://marineregions.org/gazetteer.php?p=details&id=3293), where several Offshore Wind Farms are located.
-
-## ⚙️Technical description
-
-The calculated raster layers are monthly predicted presences of European seabass in the Belgian Part of the North Sea. Predictions are ran twice, firstly incorporating a layer of full OWF presence in the study area, secondly, leaving it out. The final layer is the subtraction of the two predictions, per grid cell. This approach aims to capture the *impact* that the placement of an OWF would have for the monthly presence of European seabass in the area, addressing the question: *Are there periods with increased presence of fish in areas with offshore infrastructures?*
-Data processing and model predictions are at a daily temporal resolution, which at the end gets averaged to result in monthly layers.
-Raster cells have a spatial resolution of 7 km x 8 km (**verify!**).
-
-## 💻 Tutorial structure
-
-This repository is composed of eight main *code chunks*, which perform the steps needed to go from data retrieval to the finished model prediction raster layer. The eight chunks are located in the folder `~./02_code/`.
-
-The steps, and corresponding code chunks, are:
-
-1. **`01_detection_data_to_hourly_presences.R`**
-    - Retrieve data and metadata from the ETN database
-    - Process detection data to daily counts of indidivduals per acoustic receiver station
-    - **Input:** Raw acoustic detection data and metadata on tags, animals, and deployments
-    - **Output:** Dataframe with a row per receiver station x day combination, a column `count` with the number of individual fish detected, and the number of fish with an active tag in the water
-2. **`02_download_environmental_covariates.R`**
-    - Access and download environmental covariates from EMODnet and Copernicus Marine Service
-    - EMODnet layers: Offshore Wind Farm locations (polygons), Shipwreck locations (points), Seabed habitat category (raster), Bathymetry (raster)
-    - Copernicus Marine Service layers: Sea surface temperature (raster)
-    - **Input:** Metadata on the temporal and spatial extent of the study and dataset
-    - **Output:** Dataframes with 1 row per receiver station x day, one per environmental variable
-3. **`03_couple_env_data_to_detections.R`**
-    - Couple the outputs of chunks 1 and 2 into one dataframe
-    - For polygon layers: Binary variable saying if the receiver station is within a polygon (e.g. OWF) or not
-    - For point layers: Binary variable saying if a receiver station is within 100 metres of a shipwreck.
-    - For raster layers: Extract raster value at receiver station location
-    - **Input:** output .rds files from chunks 1 and 2
-    - **Output:** Dataframe with one row per receiver station x day, with counts of individual fish and all environmental covariates.
-4. **`04_train_GAM_model.R`**
-    - Formulate different GAM models, exploring different combinations of covariates
-    - **Input:** output .rds file from chunk 3
-    - **Output:** Several fitted GAM model objects saved as .rds file
-5. **`05_select_best_model.R`**
-    - Compare model performance of the different fitted GAM models from chunk 4
-    - Select the best performing model based on gratia:: functions, AUC and TSS metrics
-    - **Input:** Fitted models objects from chunk 4
-    - **Output:** The best performing fitted GAM model saved as .rds file
-6. **`06_create_env_grids_to_predict.R`**
-7. **`07_make_predictions.R`**
-8. **`08_plot_predictions.R`**
-
-
-
-# 📐 Setup
-
-First activate the R project by clicking on the `duc42_ga.Rproj` file. The packages necessary for this tutorial are listed in the file `renv.lock` in this repository. We can rebuild this necessary environment by running the code below and afterwards re-starting the R session by pressing the red button in the top right corner.
+First activate the R project by clicking on the `duc42_ga.Rproj` file. The packages necessary for this tutorial are listed in `renv.lock`. We can rebuild this necessary environment by running the code below and afterwards re-starting the R session by pressing the red button in the top right corner. 
 
 ```{r}
 renv::restore(rebuild = FALSE)
@@ -76,8 +16,6 @@ renv::restore(rebuild = FALSE)
 ```
 
 Re-start the R session by pressing the red button in the top right corner.
-
-# Tutorial code chunks
 
 ## Script1
 
