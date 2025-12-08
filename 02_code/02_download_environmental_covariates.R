@@ -7,9 +7,9 @@
 # Script Name: ~/duc42_ga/02_code/02_download_environmental_covariates.R
 # Script Description: download environmental data
 # SETUP ------------------------------------
-cat("\014")                          # Clears the console
-rm(list = ls())                      # Remove all variables of the work space
-source("02_code/folder_structure.R") # Create relative paths
+# cat("\014")                          # Clears the console
+# rm(list = ls())                      # Remove all variables of the work space
+# source("02_code/folder_structure.R") # Create relative paths
 
 ##################################################################################
 ##################################################################################

@@ -18,6 +18,18 @@ source("02_code/folder_structure.R") # Create relative paths
 
 ## ----load-packages------------------------------------------------------------
 
+## ----load trained models into workspace ---------------------------------------
+# the trained model .rds objects of chunk04 are in "./05_results/01_models'
+
+files <- list.files(
+  path = "./05_results/01_models",
+  pattern = "\\.rds$",
+  full.names = TRUE
+)
+
+objects <- files %>%
+  purrr::map(readRDS)
+
 ## ----compare models------------------------------------------------------------
 
 # anovas, AIC, plot from mgcv package, DHARMa package?

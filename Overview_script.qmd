@@ -79,43 +79,65 @@ Re-start the R session by pressing the red button in the top right corner.
 
 # Tutorial code chunks
 
+```{r folder-setup}
+cat("\014")                          # Clears the console
+rm(list = ls())                      # Remove all variables of the work space
+source("02_code/folder_structure.R") # Create relative paths
+```
+
+
 ## Script1
 
 In the first script the acoustic telemetry data is downloaded.
 
 A dataframe is created based on the raw data with daily information on the amount of counts of distinct fish at different stations with their respective longitude and latitude. Also the amount of total active tags in the water on a given day is given as this biases the count information.
 
-```{r}
+```{r chunk01}
 source("02_code/01_detection_data_to_hourly_presences.R")
 ```
 
-```{r}
+```{r chunk02}
 cmems_username <- "EDIT THIS WITH CMEMS USERNAME"
 cmems_password <- "EDIT THIS WITH CMEMS PASSWORD"
+
+# If .Renviron file present outside of the repository:
+readRenviron('../.Renviron')
+cmems_username <- Sys.getenv("CMEMS_USER") #replace 'CMEMS_USER' with the variable name for the CMEMS user inside the .Renviron file
+cmems_password <- Sys.getenv("CMEMS_PASS") #replace 'CMEMS_PASS' with the variable name for the CMEMS password inside the .Renviron file
+
 source("02_code/02_download_environmental_covariates.R")
 
 ```
 
-```{r}
+```{r chunk03}
 # Chunk 03
 source("02_code/03_couple_env_data_to_detections.R")
 
 
 ```
 
-```{r}
+```{r chunk04}
 # Chunk 04
 source("02_code/04_train_GAM_model.R")
 ```
 
-```{r}
+```{r chunk05}
 # Chunk 05
-source("02_code/05_create_env_grids_to_predict.R")
+source("02_code/05_select_best_model.R")
+```
 
+```{r chunk05}
+# Chunk 06
+source("02_code/06_create_env_grids_to_predict.R")
 
 ```
 
-```{r}
-# Chunk 06
-source("02_code/06_make_predictions.R")
+```{r chunk07}
+# Chunk 07
+source("02_code/07_make_predictions.R")
+```
+
+```{r chunk08}
+# Chunk 08
+source("02_code/08_plot_predictions.R")
 ```
