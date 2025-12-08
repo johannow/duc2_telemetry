@@ -25,15 +25,22 @@ get_model_name <- function(dataset, model_formula) {
  
   dataset_name <- deparse(substitute(dataset))
   
-  formula_str <- deparse(model_formula)
+  formula_str <- deparse1(model_formula, collapse = "")
 
-  # Remove response variable and unwanted characters
-  m_name <- formula_str |>
-    gsub(pattern = "acoustic_detection", replacement = "") |>
-    gsub(pattern = "[ ,~=()]", replacement = "") |>
-    gsub(pattern = "\\+", replacement = "_")
+  # Convert to compact name
+  m_name <- formula_str %>%
+    gsub("acoustic_detection\\s*~\\s*", "", .) %>%  # remove response
+    gsub("\\s+", "", .) %>%                          # remove all whitespace
+    gsub("\\(", "_", .) %>%                          # replace '(' with '_'
+    gsub("\\)", "", .) %>%                           # remove ')'
+    gsub(",", "", .) %>%                             # remove commas
+    gsub("=", "", .) %>%                             # remove '='
+    gsub('"', "", .) %>%                             # remove quotes
+    gsub("\\+", "__", .)                             # replace '+' with double underscore
   
-  name <- paste0(dataset_name, "_", m_name, "_gam")
+  m_name
+
+  name <- paste0(dataset_name, "_", m_name, ".rds")
   
   return(name)       
 }

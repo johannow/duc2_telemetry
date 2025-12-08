@@ -21,63 +21,77 @@ library(geosphere)
 library(mgcv)
 library(lubridate)
 library(bundle)
-library(rsample)
+# library(rsample)
 library(sf)
 library(purrr)
 
+## ----load-functions----------------------------------------------------------------
+source(file.path(func_dir, "get_model_name.R"))
+source(file.path(func_dir, "export_model_stats.R"))
+
 ## ----load-data----------------------------------------------------------------
-chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds")) #|>
-  # for MULTIPOINT: extract first POINT
-  # dplyr:: mutate(
-  #   geometry = map(st_geometry(.), ~ 
-  #                    if (inherits(.x, "MULTIPOINT")) {
-  #                      st_point(.x[1, ])  # extract first point as sfg POINT
-  #                    } else {
-  #                      .x                  # leave POINT as-is
-  #                    }) %>%
-  #     st_sfc(crs = st_crs(chunk03)))
+chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds")) 
 
-## ----lod-------------------------------------------------------------------------
-#The formula for length of day is daylength(lat, day of year)
-chunk03 <- chunk03 |>
-  dplyr:: mutate(lod = geosphere::daylength(deploy_latitude, lubridate::yday(time)))
+## ----MODEL 1------------------------------------------------------------
 
-  # dplyr::mutate(lod = geosphere::daylength(deploy_latitude, lubridate::yday(time)))
+m1_formula <- acoustic_detection ~
+                s(min_dist_owf, k = 20, bs = "tp") +
+                s(elevation, k = 10, bs = "tp") +
+                te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
+                s(min_dist_shipwreck, k = 20, bs = "tp")
 
-## ----prep-model-df------------------------------------------------------------
+# save metadata of model formula
+m1_formula |>
+  deparse1(collapse = "") |>
+  as_tibble() |>
+  readr::write_csv(file = file.path(mod_dir, "model1_formula.csv"))
 
-# Convert target to factor (if not yet)
-# chunk03_prep <- chunk03 |>
-#   dplyr::mutate(
-#     acoustic_detection = factor(acoustic_detection, levels = c(1, 0)), #tidymodels assume first level is level of interest
-#     habitat = as.factor(habitat)) |>
-#   sf::st_drop_geometry() |>
-#   dplyr::select(c(acoustic_detection,
-#                   min_dist_owf,
-#                   min_dist_shipwreck,
-#                   elevation,
-#                   sst,
-#                   lod)) # select the columns we use for the modelling
-
-# EDIT LP 20251208: subset data df to reduce model runtime for now
-split <- rsample::initial_split(chunk03, prop = 0.5)
-train <- rsample::training(split)
-test  <- rsample::testing(split)
-
-## ----first model------------------------------------------------------------
-
+# train model
 start_time <- Sys.time()
-# +- min
-model1 <- gam(acoustic_detection ~
-                          s(min_dist_owf, k = 20, bs = "tp") +
-                          s(elevation, k = 10, bs = "tp") +
-                          te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
-                          s(min_dist_shipwreck, k = 20, bs = "tp"),
+model1 <- gam(m1_formula,
                         family = "nb",
                         method = "REML",
                         data = chunk03)
 end_time <- Sys.time()
+print(end_time - start_time) # +- 1min
+
+# bundle model
+mod_bundle <- bundle::bundle(model1)
+
+# save bundled model to .rds
+saveRDS(mod_bundle, file.path(mod_dir, "model1.rds"))
+
+# export model statistics
+export_model_stats(model1, model_name = "model1", dir = mod_dir)
+
+## ----MODEL 2 - scaled variables-----------------------------------------------
+
+m2_formula <- acoustic_detection ~
+  s(min_dist_owf_scaled, k = 20, bs = "tp") +
+  s(elevation_scaled, k = 10, bs = "tp") +
+  te(sst_scaled, lod_scaled, k = c(10,10), bs = c("tp", "cc")) +
+  s(min_dist_shipwreck_scaled, k = 20, bs = "tp")
+
+start_time <- Sys.time()
+# +- 1min
+model2 <- gam(m2_formula,
+              family = "nb",
+              method = "REML",
+              data = chunk03)
+end_time <- Sys.time()
 print(end_time - start_time)
+
+# bundle model
+mod2_bundle <- bundle::bundle(model2)
+
+# get name for the model
+model2_name <- get_model_name(chunk03, m2_formula)
+
+# save bundled model to .rds
+saveRDS(mod_bundle, file.path(mod_dir, model2_name))
+
+# export model statistics
+export_model_stats(model2, model_name = model2_name, dir = mod_dir)
 
 #5min
 # summary(gam_fitted_model)
@@ -92,20 +106,20 @@ print(end_time - start_time)
 #                         method = "REML",
 #                         data = chunk03)
 # 
-# start_time <- Sys.time()
-# # +- min
-# gam_fitted_model <- gam(acoustic_detection ~
-#                           s(min_dist_owf_scaled, k = 20, bs = "tp") +
-#                           s(elevation_scaled, k = 10, bs = "tp") +
-#                           s(sst_scaled, k = 10, bs = "tp")+
-#                           s(lod_scaled, k = 10, bs = "cc") +
-#                           s(min_dist_shipwreck_scaled, k = 20, bs = "tp"),
-#                         family = "nb",
-#                         method = "REML",
-#                         data = chunk03)
-# end_time <- Sys.time()
-# print(end_time - start_time)
-# start_time <- Sys.time()
+start_time <- Sys.time()
+# +- min
+gam_fitted_model <- gam(acoustic_detection ~
+                          s(min_dist_owf_scaled, k = 20, bs = "tp") +
+                          s(elevation_scaled, k = 10, bs = "tp") +
+                          s(sst_scaled, k = 10, bs = "tp")+
+                          s(lod_scaled, k = 10, bs = "cc") +
+                          s(min_dist_shipwreck, k = 20, bs = "tp"),
+                        family = "nb",
+                        method = "REML",
+                        data = chunk03)
+end_time <- Sys.time()
+print(end_time - start_time)
+start_time <- Sys.time()
 # # +- min
 # gam_fitted_model <- gam(acoustic_detection ~
 #                           s(min_dist_owf_scaled, k = 20, bs = "tp") +

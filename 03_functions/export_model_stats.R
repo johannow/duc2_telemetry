@@ -4,7 +4,7 @@ export_model_stats <- function(
   model_obj,
   cv_stats = FALSE,
   model_name = NULL, #if cv stats != NULL then model name has to be != NULL
-  dir = mod_gam_dir
+  dir = mod_dir
 ) {
 
   #tmp
