@@ -25,6 +25,7 @@ library(lubridate)
 library(units)
 library(sf)
 library(terra)
+library(geosphere)
 
 
 
@@ -176,7 +177,7 @@ rm(habitats_vals)
 
 ## ----join-all-----------------------------------------------------------------
 
-output_chunk03 <-
+output_chunk03_01 <-
     chunk01 |>
         dplyr::bind_cols(chunk01_OWF |> st_drop_geometry() |> select(OWF, min_dist_owf))|>
         dplyr::bind_cols(chunk01_shipwrecks |> st_drop_geometry() |> select(shipwreck, min_dist_shipwreck))|>
@@ -184,7 +185,45 @@ output_chunk03 <-
         dplyr::bind_cols(chunk01_habitats |> st_drop_geometry() |> select(habitat)) |>
         dplyr::bind_cols(chunk01_sst |> st_drop_geometry() |> select(sst))
 
+## ----length of day ------------------------------------------------------------
+
+#The formula for length of day is daylength(lat, day of year)
+output_chunk03_02 <- output_chunk03_01 |>
+  dplyr:: mutate(lod = geosphere::daylength(deploy_latitude, lubridate::yday(time)))
+
+
+## ----scale------------------------------------------------------------
+
+output_chunk03_03 <- output_chunk03_02 |>
+  dplyr:: mutate(sst_scaled = scale(sst) |> as.numeric(),
+                 min_dist_owf_scaled = scale(min_dist_owf) |> as.numeric(),
+                 elevation_scaled = scale(elevation) |> as.numeric(),
+                 lod_scaled = scale(lod) |> as.numeric(),
+                 min_dist_shipwreck_scaled = scale(min_dist_shipwreck) |> as.numeric())
+
+## ----lat and lon in meter-based CRS------------------------------------------------------------
+
+purrr::map(output_chunk03_03, class)
+
+output_chunk03_04 <- output_chunk03_03 |>
+  ## extract first point from multipoint
+  # dplyr:: mutate(
+  #   geometry = purrr::map(sf::st_geometry(.), ~
+  #                    if (inherits(.x, "MULTIPOINT")) {
+  #                      st_point(.x[1, ])  # extract first point as sfg POINT
+  #                    } else {
+  #                      .x                  # leave POINT as-is
+  #                    }))  %>%
+      # st_sfc(crs = st_crs(chunk03)))
+  sf::st_cast("POINT") %>%
+  sf::st_transform(3035) %>%                              # project to metres
+  dplyr::mutate(
+    x_m = sf::st_coordinates(.)[,1],
+    y_m = sf::st_coordinates(.)[,2]
+  ) %>%
+  sf::st_transform(st_crs(output_chunk03_03)) 
+
 ## --------save output---------------------------------------------------------------------
 
 # as RDS
-base::saveRDS(output_chunk03, file.path(processed_dir, "output_chunk03.rds"))
+base::saveRDS(output_chunk03_04, file.path(processed_dir, "output_chunk03.rds"))
