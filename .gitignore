@@ -49,8 +49,8 @@ po/*~
 rsconnect/
 
 #Don't include big results files
-03_results/01_models/
-03_results/02_predictions/
+03_results/01_models/**/*.rds 
+03_results/02_predictions/**/*.rds 
 #Don't include big data files, only ones we manually put in repo
 01_data/02_processed_data/
 
