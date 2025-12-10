@@ -57,12 +57,24 @@ The steps, and corresponding code chunks, are:
 5. **`05_select_best_model.R`**
     - Compare model performance of the different fitted GAM models from chunk 4
     - Select the best performing model based on gratia:: functions, AUC and TSS metrics
+    - The workflow is as follows: 
+      Firstly, a model formula for the whole dataset is found (which captures the whole of the data)
+      Then, the model is run on two subsets of the data: data from within and without Offshore Wind Farms.
+      These two trained model objects, alongside with the found model formula, form the output of this chunk.
     - **Input:** Fitted models objects from chunk 4
-    - **Output:** The best performing fitted GAM model saved as .rds file
+    - **Output:** The best performing fitted GAM model, as .rds file
 6. **`06_create_env_grids_to_predict.R`**
+    - Create the file used to predict on
+    - **Input:** Environmental data layers from chunk02
+    - **Output:** one file per environmental variable used in the model, and 1 layer per timestep (in case of env variables changing over time)
 7. **`07_make_predictions.R`**
+    - Use the trained model to predict on the env. data 
+    - Make two kinds of predictions: 1) Include a layer of OWF presence everywhere in the env data layers, and 2) leave it out
+      *This is to simulate the presence of offshore wind farms*
+    - **Input:** Fitted model object from chunk 5, environmental grids from chunk 06.
+    - **Output:** Two predictions raster files from the two predictions.
 8. **`08_plot_predictions.R`**
-
+    - **Input:** Raster files from chunk 08.
 
 
 # 📐 Setup

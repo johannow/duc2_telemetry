@@ -19,6 +19,13 @@
 #'
 #' @examples
 train_gam <- function(formula, family = "nb", method = "REML", dataset, dir, model_name){
+  # Step 0: create directory for the model inside the given dir
+  model_folder <- file.path(dir, model_name)
+  
+  if (!dir.exists(model_folder)) {
+    dir.create(model_folder)
+  }
+  
   # Step 1) Train model
 
     start_time <- Sys.time()
@@ -37,11 +44,11 @@ train_gam <- function(formula, family = "nb", method = "REML", dataset, dir, mod
     model_bundle <- bundle::bundle(model)
     
     # save bundled model to .rds
-    saveRDS(model_bundle, file.path(directory, paste0(model_name, ".rds")))
+    saveRDS(model_bundle, file.path(model_folder, paste0(model_name, ".rds")))
     
   # Step 3)
     # export model statistics
-    export_model_stats(model, model_name = model_name, dir = directory)
+    export_model_stats(model, model_name = model_name, dir = model_folder)
     
   # Step 4
     # save metadata of model
@@ -53,9 +60,9 @@ train_gam <- function(formula, family = "nb", method = "REML", dataset, dir, mod
              family = family,
              method = method,
              runtime_s = model_runtime |> as.numeric(),
-             directory = directory)
+             directory = model_folder)
 
-    readr::write_csv(model_metadata, file = file.path(directory, paste0(model_name, "_model_metadata.rds")))
+    readr::write_csv(model_metadata, file = file.path(model_folder, paste0(model_name, "_model_metadata.rds")))
     
     return(model)
 }

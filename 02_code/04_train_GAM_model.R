@@ -23,11 +23,12 @@ library(lubridate)
 library(bundle)
 # library(rsample)
 library(sf)
-library(purrr)
+# library(purrr)
 
 ## ----load-functions----------------------------------------------------------------
 source(file.path(func_dir, "get_model_name.R"))
 source(file.path(func_dir, "export_model_stats.R"))
+source(file.path(func_dir, "train_gam.R"))
 
 ## ----load-data----------------------------------------------------------------
 chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds")) 
@@ -38,7 +39,31 @@ m1_formula <- acoustic_detection ~
                 s(min_dist_owf, k = 20, bs = "tp") +
                 s(elevation, k = 10, bs = "tp") +
                 te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
-                s(min_dist_shipwreck, k = 20, bs = "tp")
+                s(min_dist_shipwreck, k = 20, bs = "tp") #+
+                #offset(n_active_tags)
+
+m1 <- train_gam(formula = m1_formula,
+                dataset = chunk03,
+                dir = mod_dir,
+                model_name = "m1_owf_elevation_sstlod_shipwreck")
+
+# write a function that tests the model (dharma) and that visualises the model (gratia)
+
+
+## ----MODEL 2------------------------------------------------------------
+
+m2_formula <- acoustic_detection ~
+  s(min_dist_owf, k = 20, bs = "tp") +
+  # s(elevation, k = 10, bs = "tp") +
+  te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
+  # s(min_dist_shipwreck, k = 20, bs = "tp") +
+  offset(n_active_tags)
+
+m2 <- train_gam(formula = m2_formula,
+                dataset = chunk03,
+                dir = mod_dir,
+                model_name = "m2_owf_sstlod_offset")
+
 
 # save metadata of model formula
 m1_formula |>
@@ -72,6 +97,12 @@ m2_formula <- acoustic_detection ~
   te(sst_scaled, lod_scaled, k = c(10,10), bs = c("tp", "cc")) +
   s(min_dist_shipwreck_scaled, k = 20, bs = "tp")
 
+# save metadata of model formula
+m2_formula |>
+  deparse1(collapse = "") |>
+  as_tibble() |>
+  readr::write_csv(file = file.path(mod_dir, "model2_formula.csv"))
+
 start_time <- Sys.time()
 # +- 1min
 model2 <- gam(m2_formula,
@@ -92,6 +123,37 @@ saveRDS(mod_bundle, file.path(mod_dir, model2_name))
 
 # export model statistics
 export_model_stats(model2, model_name = model2_name, dir = mod_dir)
+
+## ----MODEL 3------------------------------------------------------------
+
+m3_formula <- acoustic_detection ~
+  s(min_dist_owf, k = 20, bs = "tp") +
+  te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
+  s(min_dist_shipwreck, k = 20, bs = "tp")
+
+# save metadata of model formula
+m3_formula |>
+  deparse1(collapse = "") |>
+  as_tibble() |>
+  readr::write_csv(file = file.path(mod_dir, "model3_formula.csv"))
+
+# train model
+start_time <- Sys.time()
+model3 <- gam(m3_formula,
+              family = "nb",
+              method = "REML",
+              data = chunk03)
+end_time <- Sys.time()
+print(end_time - start_time) # +- 1min
+
+# bundle model
+mod_bundle <- bundle::bundle(model3)
+
+# save bundled model to .rds
+saveRDS(mod_bundle, file.path(mod_dir, "model3.rds"))
+
+# export model statistics
+export_model_stats(model3, model_name = "model3", dir = mod_dir)
 
 #5min
 # summary(gam_fitted_model)
