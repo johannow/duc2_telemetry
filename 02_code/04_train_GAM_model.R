@@ -21,31 +21,64 @@ library(geosphere)
 library(mgcv)
 library(lubridate)
 library(bundle)
+library(tibble)
 # library(rsample)
 library(sf)
-# library(purrr)
+#library(purrr)
 
 ## ----load-functions----------------------------------------------------------------
-source(file.path(func_dir, "get_model_name.R"))
-source(file.path(func_dir, "export_model_stats.R"))
-source(file.path(func_dir, "train_gam.R"))
+list.files(func_dir, pattern = "\\.R$", full.names = TRUE) |>
+  purrr::walk(source)
 
 ## ----load-data----------------------------------------------------------------
 chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds")) 
 
+# make quick subset for faster model testing
+chunk03_subset <- 
+  chunk03 |>
+    dplyr::slice_sample(n = (nrow(chunk03)/3) |> round())
+
 ## ----MODEL 1------------------------------------------------------------
 
+# Step1: formulate the model
 m1_formula <- acoustic_detection ~
                 s(min_dist_owf, k = 20, bs = "tp") +
                 s(elevation, k = 10, bs = "tp") +
                 te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
                 s(min_dist_shipwreck, k = 20, bs = "tp") #+
                 #offset(n_active_tags)
-
+# Step 2: train the model
 m1 <- train_gam(formula = m1_formula,
-                dataset = chunk03,
+                family = mgcv::nb(),
+                dataset = chunk03_subset,
                 dir = mod_dir,
-                model_name = "m1_owf_elevation_sstlod_shipwreck")
+                model_name = "m1_owf_elevation_sstlod_shipwreck_subset")
+
+# Step 3: inspect and check the model's smooth terms
+m1 |> gam.check()
+
+## TODO: maybe have gam.check plots render in another function to be ahown in console
+m1 |> check_and_save_gam(dir = mod_dir,
+                         model_name = "m1_owf_elevation_sstlod_shipwreck_subset")
+
+m1_structure <- m1 |> check_gam_structure()
+
+m1_residuals <- m1 |> check_gam_residuals(data = chunk03_subset, dir = mod_dir,
+                                          model_name = "m1_owf_elevation_sstlod_shipwreck_subset")
+
+which(m1_residuals$sim$scaledResiduals > 0.9)
+
+# TODO: write and refine function to vosualise with gratia
+
+
+
+# Step 4: visualise the model (using the gratia package)
+m1 |> visualise_gam()
+
+
+# Step 5: inspect the model residuals and distribution (using the DHARMa package)
+
+
 
 # write a function that tests the model (dharma) and that visualises the model (gratia)
 

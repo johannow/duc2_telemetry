@@ -1,0 +1,121 @@
+model_name,smooth,edf,aic,bic,deviance_explained,r_sq,sp_mean,summary_text
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_owf),18.375194854956913,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(elevation),1.0004836405804385,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,"te(sst,lod)",49.50683125288122,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_shipwreck),12.229729699236069,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,model_overall,82.11223944765464,6937.5532852176575,7610.1011493692895,0.8032115490868692,0.7238864581024536,3788.267006243693,"
+Family: Negative Binomial(44.081) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + s(elevation, 
+    k = 10, bs = ""tp"") + te(sst, lod, k = c(10, 10), bs = c(""tp"", 
+    ""cc"")) + s(min_dist_shipwreck, k = 20, bs = ""tp"")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)   -6.093      0.237  -25.71   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df   Chi.sq p-value    
+s(min_dist_owf)       18.38 18.902  550.456  <2e-16 ***
+s(elevation)           1.00  1.001    0.128   0.721    
+te(sst,lod)           49.51 56.973 1037.307  <2e-16 ***
+s(min_dist_shipwreck) 12.23 14.308  200.276  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.724   Deviance explained = 80.3%
+-REML = 3595.5  Scale est. = 1         n = 13324"
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_owf),18.375194854956913,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(elevation),1.0004836405804385,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,"te(sst,lod)",49.50683125288122,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_shipwreck),12.229729699236069,NA,NA,NA,NA,3788.267006243693,NA
+m1_owf_elevation_sstlod_shipwreck_subset,model_overall,82.11223944765464,6937.5532852176575,7610.1011493692895,0.8032115490868692,0.7238864581024536,3788.267006243693,"
+Family: Negative Binomial(44.081) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + s(elevation, 
+    k = 10, bs = ""tp"") + te(sst, lod, k = c(10, 10), bs = c(""tp"", 
+    ""cc"")) + s(min_dist_shipwreck, k = 20, bs = ""tp"")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)   -6.093      0.237  -25.71   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df   Chi.sq p-value    
+s(min_dist_owf)       18.38 18.902  550.456  <2e-16 ***
+s(elevation)           1.00  1.001    0.128   0.721    
+te(sst,lod)           49.51 56.973 1037.307  <2e-16 ***
+s(min_dist_shipwreck) 12.23 14.308  200.276  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.724   Deviance explained = 80.3%
+-REML = 3595.5  Scale est. = 1         n = 13324"
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_owf),17.967684998138193,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(elevation),6.790034192751,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,"te(sst,lod)",46.02613134050882,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_shipwreck),15.225731188869485,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,model_overall,87.0095817202675,6882.174599415101,7566.032521298857,0.8113730409246179,0.7341522716468714,0.29341473313182703,"
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + s(elevation, 
+    k = 10, bs = ""tp"") + te(sst, lod, k = c(10, 10), bs = c(""tp"", 
+    ""cc"")) + s(min_dist_shipwreck, k = 20, bs = ""tp"")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320"
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_owf),17.967684998138193,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(elevation),6.790034192751,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,"te(sst,lod)",46.02613134050882,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,s(min_dist_shipwreck),15.225731188869485,NA,NA,NA,NA,0.29341473313182703,NA
+m1_owf_elevation_sstlod_shipwreck_subset,model_overall,87.0095817202675,6882.174599415101,7566.032521298857,0.8113730409246179,0.7341522716468714,0.29341473313182703,"
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + s(elevation, 
+    k = 10, bs = ""tp"") + te(sst, lod, k = c(10, 10), bs = c(""tp"", 
+    ""cc"")) + s(min_dist_shipwreck, k = 20, bs = ""tp"")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320"

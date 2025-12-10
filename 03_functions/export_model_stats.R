@@ -25,7 +25,7 @@ export_model_stats <- function(
   gam_obj <- tryCatch(
     workflows::extract_fit_engine(model_unbundled),
     error = function(e) {
-      message("⚠️ Could not extract GAM engine — assuming this is already a mgcv::gam object.")
+      #message("⚠️ Could not extract GAM engine — assuming this is already a mgcv::gam object.")
       return(model_unbundled)
     }
   )
@@ -75,7 +75,7 @@ model_stats <- tibble::tibble(
 
   
 # --- 8. Write or append results ---
-results_path <- paste0(dir, "/", model_name, "_model_stats.csv")
+results_path <- paste0(dir, "/", "stats.csv")
 if (file.exists(results_path)) {
   readr::write_csv(model_stats, results_path, append = TRUE)
 } else {

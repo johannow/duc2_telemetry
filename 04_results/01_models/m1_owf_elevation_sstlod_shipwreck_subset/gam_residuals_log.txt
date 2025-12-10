@@ -1,0 +1,518 @@
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.92    0.02 *  
+s(elevation)           9.00  6.79    0.90  <2e-16 ***
+te(sst,lod)           89.00 46.03    0.86  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.89  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+RStudioGD 
+        2 
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+- Look for: points near 45° line, heavy tails, S-shaped curves
+- Actions: alternative family, transform response, inspect outliers
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+- Look for: funnel shapes, curves
+- Actions: add predictors, smooths, interactions, consider weights
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+- Look for: skew, heavy tails, bimodality
+- Actions: transform response, robust GAM, check subpopulations
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function
+- Look for: points away from 45° line, trends
+- Actions: adjust family or link, add smooths/interactions
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.86  <2e-16 ***
+s(elevation)           9.00  6.79    0.94     0.1    
+te(sst,lod)           89.00 46.03    0.86  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.85  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+- Look for: points near 45° line, heavy tails, S-shaped curves
+- Actions: alternative family, transform response, inspect outliers
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+- Look for: funnel shapes, curves
+- Actions: add predictors, smooths, interactions, consider weights
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+- Look for: skew, heavy tails, bimodality
+- Actions: transform response, robust GAM, check subpopulations
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function
+- Look for: points away from 45° line, trends
+- Actions: adjust family or link, add smooths/interactions
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.91  <2e-16 ***
+s(elevation)           9.00  6.79    0.94    0.16    
+te(sst,lod)           89.00 46.03    0.88  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.90  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.84  <2e-16 ***
+s(elevation)           9.00  6.79    0.92   0.015 *  
+te(sst,lod)           89.00 46.03    0.84  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.84  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.85  <2e-16 ***
+s(elevation)           9.00  6.79    0.94    0.12    
+te(sst,lod)           89.00 46.03    0.84  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.84  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+- Look for: points near 45° line, heavy tails, S-shaped curves
+- Actions: alternative family, transform response, inspect outliers
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+- Look for: funnel shapes, curves
+- Actions: add predictors, smooths, interactions, consider weights
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+- Look for: skew, heavy tails, bimodality
+- Actions: transform response, robust GAM, check subpopulations
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function
+- Look for: points away from 45° line, trends
+- Actions: adjust family or link, add smooths/interactions
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.86  <2e-16 ***
+s(elevation)           9.00  6.79    0.95    0.34    
+te(sst,lod)           89.00 46.03    0.84  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.84  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+- Look for: points near 45° line, heavy tails, S-shaped curves
+- Actions: alternative family, transform response, inspect outliers
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+- Look for: funnel shapes, curves
+- Actions: add predictors, smooths, interactions, consider weights
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+- Look for: skew, heavy tails, bimodality
+- Actions: transform response, robust GAM, check subpopulations
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function
+- Look for: points away from 45° line, trends
+- Actions: adjust family or link, add smooths/interactions
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.84  <2e-16 ***
+s(elevation)           9.00  6.79    0.95    0.57    
+te(sst,lod)           89.00 46.03    0.81  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.85  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+RStudioGD 
+        2 
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+- Look for: points near 45° line, heavy tails, S-shaped curves
+- Actions: alternative family, transform response, inspect outliers
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+- Look for: funnel shapes, curves
+- Actions: add predictors, smooths, interactions, consider weights
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+- Look for: skew, heavy tails, bimodality
+- Actions: transform response, robust GAM, check subpopulations
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function
+- Look for: points away from the 45° line, trends
+- Actions: adjust family or link, add smooths/interactions
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.84  <2e-16 ***
+s(elevation)           9.00  6.79    0.93    0.08 .  
+te(sst,lod)           89.00 46.03    0.83  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.83  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+- Look for: points near 45° line, heavy tails, S-shaped curves
+- Actions: alternative family, transform response, inspect outliers
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+- Look for: funnel shapes, curves
+- Actions: add predictors, smooths, interactions, consider weights
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+- Look for: skew, heavy tails, bimodality
+- Actions: transform response, robust GAM, check subpopulations
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function
+- Look for: points away from 45° line, trends
+- Actions: adjust family or link, add smooths/interactions
+
+Family: Negative Binomial(181.205) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = "tp") + s(elevation, 
+    k = 10, bs = "tp") + te(sst, lod, k = c(10, 10), bs = c("tp", 
+    "cc")) + s(min_dist_shipwreck, k = 20, bs = "tp")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -6.6066     0.3516  -18.79   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       17.97 18.470  446.89  <2e-16 ***
+s(elevation)           6.79  7.588   40.54  <2e-16 ***
+te(sst,lod)           46.03 53.689 1088.33  <2e-16 ***
+s(min_dist_shipwreck) 15.23 16.537  196.09  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.734   Deviance explained = 81.1%
+-REML = 3584.7  Scale est. = 1         n = 13320
+
+Method: REML   Optimizer: outer newton
+full convergence after 10 iterations.
+Gradient range [-0.0008880777,1.681461e-05]
+(score 3584.733 & scale 1).
+Hessian positive definite, eigenvalue range [0.105178,8.748898].
+Model rank =  137 / 137 
+
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+                         k'   edf k-index p-value    
+s(min_dist_owf)       19.00 17.97    0.85  <2e-16 ***
+s(elevation)           9.00  6.79    0.93   0.065 .  
+te(sst,lod)           89.00 46.03    0.88  <2e-16 ***
+s(min_dist_shipwreck) 19.00 15.23    0.85  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function� 1
+
+1️⃣ QQ plot of residuals
+- Checks if residuals follow the expected distribution
+
+2️⃣ Residuals vs linear predictor
+- Checks for heteroskedasticity or missing non-linear patterns
+
+3️⃣ Histogram of residuals
+- Checks residual distribution
+
+4️⃣ Response vs fitted values
+- Checks prediction accuracy and link function
