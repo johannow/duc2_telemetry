@@ -55,15 +55,19 @@ m1 <- train_gam(formula = m1_formula,
                 model_name = "m1_owf_elevation_sstlod_shipwreck_subset")
 
 # Step 3: inspect and check the model's smooth terms
-m1 |> gam.check()
 
-## TODO: maybe have gam.check plots render in another function to be ahown in console
+## TODO: maybe have gam.check plots render in another function to be shown in console
+# m1 |> gam.check()
 m1 |> check_and_save_gam(dir = mod_dir,
                          model_name = "m1_owf_elevation_sstlod_shipwreck_subset")
 
+# Step 3b) check model's concurvity and Effective Degrees of Freedom (EDF)
 m1_structure <- m1 |> check_gam_structure()
 
-m1_residuals <- m1 |> check_gam_residuals(data = chunk03_subset, dir = mod_dir,
+# Step 3c) check residuals
+m1_residuals <- 
+  m1 |> check_gam_residuals(data = chunk03_subset, 
+                                          dir = mod_dir,
                                           model_name = "m1_owf_elevation_sstlod_shipwreck_subset")
 
 which(m1_residuals$sim$scaledResiduals > 0.9)

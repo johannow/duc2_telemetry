@@ -7,7 +7,7 @@ check_gam_residuals <- function(model, data, dir, model_name) {
     dir.create(model_folder)
   }
   
-  output <- utils::capture.output({ # for logfile
+  # output <- utils::capture.output({ # for logfile
     message("🔹 Running DHARMa residual diagnostics ...")
     
     # Simulate residuals (safe version that avoids mgcViz requirement)
@@ -112,13 +112,13 @@ check_gam_residuals <- function(model, data, dir, model_name) {
     } else {
       message("✓ All DHARMa residual diagnostics look healthy.")
     }
-  })
-  
-  # Write log to file.path()
-  log_path <- file.path(model_folder, "gam_residuals_log.txt")
-  writeLines(output, log_path)
-  
-  message("📄 Log saved to: ", log_path)
+    
+  # })
+  # # Write log to file.path()
+  # log_path <- file.path(model_folder, "gam_residuals_log.txt")
+  # writeLines(output, log_path)
+  # 
+  # message("📄 Log saved to: ", log_path)
   
   invisible(list(
     sim = sim,

@@ -5,11 +5,11 @@ check_and_save_gam <- function(model, dir, model_name) {
   if (!dir.exists(model_folder)) dir.create(model_folder, recursive = TRUE)
   
   pdf_path <- file.path(model_folder, "gam_checks.pdf")
-  log_path <- file.path(model_folder, "gam_checks_log.txt")
+  # log_path <- file.path(model_folder, "gam_checks_log.txt")
   
   # Capture *all* output and messages
-  log_text <- capture.output(
-    {
+  # log_text <- capture.output(
+  #   {
       message("🔹 Model summary")
       print(summary(model))
       
@@ -20,28 +20,34 @@ check_and_save_gam <- function(model, dir, model_name) {
       message("🔹 GAM check plots saved to: ", pdf_path)
       
       message("🔹 Interpretation help for gam.check()")
-      
-      cat("\n1️⃣ QQ plot of residuals\n")
-      cat("- Checks if residuals follow the expected distribution\n\n")
-      cat("2️⃣ Residuals vs linear predictor\n")
-      cat("- Checks for heteroskedasticity or missing non-linear patterns\n\n")
-      cat("3️⃣ Histogram of residuals\n")
-      cat("- Checks residual distribution\n\n")
-      cat("4️⃣ Response vs fitted values\n")
-      cat("- Checks prediction accuracy and link function\n")
-    },
-    type = "output"   # <- captures prints + cat + message()
-  )
+        cat("\n1️⃣ QQ plot of residuals\n")
+        cat("- Checks if residuals follow the expected distribution\n")
+        cat("- Look for: points near 45° line, heavy tails, S-shaped curves\n\n")
+
+        cat("2️⃣ Residuals vs linear predictor\n")
+        cat("- Checks for heteroskedasticity or missing non-linear patterns\n")
+        cat("- Look for: funnel shapes, curves\n\n")
+
+        cat("3️⃣ Histogram of residuals\n")
+        cat("- Checks residual distribution\n")
+        cat("- Look for: skew, heavy tails, bimodality\n\n")
+
+        cat("4️⃣ Response vs fitted values\n")
+        cat("- Checks prediction accuracy and link function\n")
+        cat("- Look for: points away from 45° line, trends\n")
+  #   },
+  #   type = "output"   # <- captures prints + cat + message()
+  # )
   
-  # Write clean log file (overwrite)
-  writeLines(log_text, log_path)
+  # # Write clean log file (overwrite)
+  # writeLines(log_text, log_path)
+  # 
+  # # Also print everything to console
+  # cat(paste(log_text, collapse = "\n"))
+  # 
+  # message("📄 Log saved to: ", log_path)
   
-  # Also print everything to console
-  cat(paste(log_text, collapse = "\n"))
-  
-  message("📄 Log saved to: ", log_path)
-  
-  invisible(list(log = log_path, plots = pdf_path))
+  # invisible(list(log = log_path, plots = pdf_path))
 }
 
 
