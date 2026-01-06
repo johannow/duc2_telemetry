@@ -99,7 +99,7 @@ terra::plot(diff_owf)
 
 ## make predictions for the owf_dist raster --------------------------------
 ### in addition to predicting counts of fish for rasters with 0 or 1 owf, we predict for the owf_dist raster layer
-diff_owf <- list()
+predictions_owf_dist <- list()
 # make daily predictions
 for(i in 1:nlyr(sst)){
   predictors_owf_dist <- c(bathy, sst[[i]], lod[[i]], owf_dist, shipwreck_dist, n_active_tags[[i]]) # owf raster with dist to owf
