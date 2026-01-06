@@ -24,6 +24,9 @@ library(sf)
 ## ----parameters----------------------------------------------------------------
 start <- "2021-01-01"
 end <- "2022-12-31"
+# Create sequence of dates
+dates <- seq.Date(from = as.Date(start), to = as.Date(end), by = "day")
+doy   <- lubridate::yday(dates)
 
 ## ----load-input---------------------------------------------------------------
 # Load datasets generated in chunk02
@@ -78,18 +81,32 @@ terra::plot(OWF_dist_rast, main = "Distance to OWF")
 terra::plot(shipwreck_dist_rast, main = "Distance to shipwreck")
 
 ## ----lod-raster---------------------------------------------------------------
-#The formula for length of day is daylength(lat, day of year)
-lod <- list()
-for(i in 1:365){
-  lod[[i]] <- setValues(rast(r),geosphere::daylength(lat_vals, i))
-}
-lod <- terra::rast(lod)
-lod <- mask(lod, BPNS)
-time(lod) <- seq(ymd(start),ymd(end), by = '1 day')
-names(lod) <- stringr::str_replace(time(lod), "[0-9]+-", "")
-varnames(lod) <- "Length of day"
-terra::plot(lod[[c(1,90,180,270)]])
+# #The formula for length of day is daylength(lat, day of year)
+# lod <- list()
+# for(i in 1:365){
+#   lod[[i]] <- setValues(rast(r),geosphere::daylength(lat_vals, i))
+# }
+# lod <- terra::rast(lod)
+# lod <- mask(lod, BPNS)
+# time(lod) <- seq(ymd(start),ymd(end), by = '1 day')
+# names(lod) <- stringr::str_replace(time(lod), "[0-9]+-", "")
+# varnames(lod) <- "Length of day"
+# terra::plot(lod[[c(1,90,180,270)]])
 
+# new approach that creates one layer per timestep
+
+# build the raster stack
+lod <- purrr::map(doy, ~{
+  r %>%
+    setValues(geosphere::daylength(lat_vals, .x))
+}) %>%
+  rast() %>%
+  mask(r)
+# Assign the time
+time(lod) <- dates
+#names(lod) <- stringr::str_replace(time(lod), "[0-9]+-", "")
+varnames(lod) <- "lod"
+names(lod) <- as.character(dates)
 
 ## ----n_active_tags raster ----------------------------------------------------
 # For the offset in the model, a spatially constant raster with the amount of 
@@ -102,67 +119,20 @@ n_active_tags <- #number of active tags per timestep
     dplyr::select(n_active_tags) %>%
     as.list()
 
-n_active_tags_rast <- vector("list", length = length(n_active_tags))
-n_active_tags_rast <- terra::rast(n_active_tags$n_active_tags)
-
-library(terra)
-library(lubridate)
-
-# Inputs:
-# BPNS          : your existing SpatRaster defining extent, resolution, and CRS
-# start, end    : start and end dates as Date or character (e.g. "2023-01-01")
-# n_active_tags : numeric vector with values for each day in the date range
-
-# 1. Create sequence of dates
-dates <- seq.Date(from = as.Date(start), to = as.Date(end), by = "day")
-stopifnot(length(dates) == length(n_active_tags$n_active_tags))  # sanity check
-
 # 2. Create an empty raster with the same properties as BPNS
-template <- rast(BPNS)
-
+n_active_tags_rast <- rast(r)
 # 3. Set number of layers = number of days
-nlyr(template) <- length(dates)
-
-# 4. Assign layer names as dates (optional, for clarity)
-names(template) <- as.character(dates)
-
+nlyr(n_active_tags_rast) <- length(dates)
+# 4. Assign layer names as dates
+names(n_active_tags_rast) <- as.character(dates)
 # 5. Fill each layer with the corresponding n_active_tags value (spatially constant)
-# Efficient vectorized filling:
-values(template) <- matrix(rep(n_active_tags, each = ncell(template)), nrow = ncell(template), ncol = length(dates))
-
-# 6. (Optional) Assign time dimension
-time(template) <- dates
-
-# Result: 'template' is your multilayer SpatRaster with daily layers and constant values per layer
-print(template)
-
-# # Fill each raster with the constant value for that day
-# for(i in 1:length(n_active_tags$n_active_tags)) {
-#   
-#   # Create a raster with the same properties as r
-#   n_active_tags_rast[i] <- setValues(temp_rast, n_active_tags[i])
-#   
-#   # Store in list
-#   n_active_tags_list[[i]] <- temp_rast
-# }
-# 
-# # Stack all daily rasters into one SpatRaster
-# n_active_tags_rast <- rast(n_active_tags_list)
-# 
-# # Apply mask if needed
-# n_active_tags_rast <- mask(n_active_tags_rast, BPNS)
-# 
-# # Set time dimension
-# time(n_active_tags_rast) <- seq(ymd(start), ymd(end), by = "1 day")
-# 
-# # Clean layer names to show month-day only (remove year)
-# names(n_active_tags_rast) <- str_replace(time(n_active_tags_rast), "^[0-9]{4}-", "")
-# 
-# # Set variable name for metadata
-# varnames(n_active_tags_rast) <- "Active Tags"
-# 
-# # Plot example layers (e.g., day 1, 90, 180, 270)
-# plot(n_active_tags_rast[[c(1, 90, 180, 270)]])
+for (i in seq_along(dates)) {
+  values(n_active_tags_rast[[i]]) <- n_active_tags$n_active_tags[i]
+}
+# 6. Assign time dimension
+time(n_active_tags_rast) <- dates
+# 7. mask with BPNS boundaries
+n_active_tags_rast <- terra::mask(n_active_tags_rast, r)
 
 ## ----write-results------------------------------------------------------------
 #lat
@@ -175,4 +145,5 @@ terra::writeCDF(shipwreck_dist_rast, file.path(processed_dir,"shipwreck_dist_ras
 terra::writeCDF(OWF_dist_rast, file.path(processed_dir,"OWF_dist_rast.nc"), varname = "distance_to_OWF", overwrite = TRUE)
 #length of day
 terra::writeCDF(lod, file.path(processed_dir,"lod_rast.nc"), varname = "length_of_day", overwrite = TRUE)
-
+#n_active_tags
+terra::writeCDF(n_active_tags_rast, file.path(processed_dir,"n_active_tags_rast.nc"), varname = "n_active_tags", overwrite = TRUE)
