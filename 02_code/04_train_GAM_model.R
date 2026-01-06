@@ -22,6 +22,7 @@ library(mgcv)
 library(lubridate)
 library(bundle)
 library(tibble)
+library(gratia)
 # library(rsample)
 library(sf)
 #library(purrr)
@@ -89,78 +90,64 @@ m1 |> visualise_gam()
 
 ## ----MODEL 2------------------------------------------------------------
 
-m2_formula <- acoustic_detection ~
+model2_formula <- acoustic_detection ~
   s(min_dist_owf, k = 20, bs = "tp") +
   # s(elevation, k = 10, bs = "tp") +
   te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
   # s(min_dist_shipwreck, k = 20, bs = "tp") +
   offset(n_active_tags)
 
-m2 <- train_gam(formula = m2_formula,
+model2 <- train_gam(formula = m2_formula,
                 dataset = chunk03,
                 dir = mod_dir,
                 model_name = "m2_owf_sstlod_offset")
 
 
 # save metadata of model formula
-m1_formula |>
+model2_formula |>
   deparse1(collapse = "") |>
   as_tibble() |>
-  readr::write_csv(file = file.path(mod_dir, "model1_formula.csv"))
+  readr::write_csv(file = file.path(mod_dir, "model2_formula.csv"))
 
-# train model
-start_time <- Sys.time()
-model1 <- gam(m1_formula,
-                        family = "nb",
-                        method = "REML",
-                        data = chunk03)
-end_time <- Sys.time()
-print(end_time - start_time) # +- 1min
+# # train model
+# start_time <- Sys.time()
+# model1 <- gam(m1_formula,
+#                         family = "nb",
+#                         method = "REML",
+#                         data = chunk03)
+# end_time <- Sys.time()
+# print(end_time - start_time) # +- 1min
 
 # bundle model
-mod_bundle <- bundle::bundle(model1)
+mod_bundle <- bundle::bundle(model2)
 
 # save bundled model to .rds
-saveRDS(mod_bundle, file.path(mod_dir, "model1.rds"))
+saveRDS(mod_bundle, file.path(mod_dir, "model2.rds"))
 
 # export model statistics
-export_model_stats(model1, model_name = "model1", dir = mod_dir)
+export_model_stats(model2, model_name = "model2", dir = mod_dir)
 
 ## ----MODEL 2 - scaled variables-----------------------------------------------
 
-m2_formula <- acoustic_detection ~
+model2_formula_scaled <- acoustic_detection ~
   s(min_dist_owf_scaled, k = 20, bs = "tp") +
   s(elevation_scaled, k = 10, bs = "tp") +
   te(sst_scaled, lod_scaled, k = c(10,10), bs = c("tp", "cc")) +
   s(min_dist_shipwreck_scaled, k = 20, bs = "tp")
 
-# save metadata of model formula
-m2_formula |>
-  deparse1(collapse = "") |>
-  as_tibble() |>
-  readr::write_csv(file = file.path(mod_dir, "model2_formula.csv"))
-
-start_time <- Sys.time()
-# +- 1min
-model2 <- gam(m2_formula,
-              family = "nb",
-              method = "REML",
-              data = chunk03)
-end_time <- Sys.time()
-print(end_time - start_time)
+model2_scaled <- train_gam(formula = model2_formula_scaled,
+                    dataset = chunk03,
+                    dir = mod_dir,
+                    model_name = "m2_owf_sstlod_offset_scaled")
 
 # bundle model
-mod2_bundle <- bundle::bundle(model2)
-
-# get name for the model
-model2_name <- get_model_name(chunk03, m2_formula)
+mod_bundle <- bundle::bundle(model2_scaled)
 
 # save bundled model to .rds
-saveRDS(mod_bundle, file.path(mod_dir, model2_name))
+saveRDS(mod_bundle, file.path(mod_dir, "model2_scaled.rds"))
 
 # export model statistics
-export_model_stats(model2, model_name = model2_name, dir = mod_dir)
-
+export_model_stats(model2_scaled, model_name = "model2_scaled", dir = mod_dir)
 ## ----MODEL 3------------------------------------------------------------
 
 m3_formula <- acoustic_detection ~

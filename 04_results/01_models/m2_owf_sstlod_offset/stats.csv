@@ -1,0 +1,51 @@
+model_name,smooth,edf,aic,bic,deviance_explained,r_sq,sp_mean,summary_text
+m2_owf_sstlod_offset,s(min_dist_owf),18.977871566497004,NA,NA,NA,NA,2.7156307763342394e-4,NA
+m2_owf_sstlod_offset,"te(sst,lod)",79.86696696733392,NA,NA,NA,NA,2.7156307763342394e-4,NA
+m2_owf_sstlod_offset,model_overall,99.84483853383094,36501.442706455615,37389.95568406439,0.9254103560251858,-5107217445590499e7,2.7156307763342394e-4,"
+Family: Negative Binomial(0.111) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + te(sst, 
+    lod, k = c(10, 10), bs = c(""tp"", ""cc"")) + offset(n_active_tags)
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -45.1725     0.2748  -164.4   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                  edf Ref.df Chi.sq p-value    
+s(min_dist_owf) 18.98  19.00  52441  <2e-16 ***
+te(sst,lod)     79.87  82.15  14791  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  -5.11e+22   Deviance explained = 92.5%
+-REML =  18565  Scale est. = 1         n = 40703"
+m2_owf_sstlod_offset,s(min_dist_owf),18.977871566497004,NA,NA,NA,NA,2.7156307763342394e-4,NA
+m2_owf_sstlod_offset,"te(sst,lod)",79.86696696733392,NA,NA,NA,NA,2.7156307763342394e-4,NA
+m2_owf_sstlod_offset,model_overall,99.84483853383094,36501.442706455615,37389.95568406439,0.9254103560251858,-5107217445590499e7,2.7156307763342394e-4,"
+Family: Negative Binomial(0.111) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + te(sst, 
+    lod, k = c(10, 10), bs = c(""tp"", ""cc"")) + offset(n_active_tags)
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -45.1725     0.2748  -164.4   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                  edf Ref.df Chi.sq p-value    
+s(min_dist_owf) 18.98  19.00  52441  <2e-16 ***
+te(sst,lod)     79.87  82.15  14791  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  -5.11e+22   Deviance explained = 92.5%
+-REML =  18565  Scale est. = 1         n = 40703"

@@ -1,0 +1,2 @@
+name,dataset,formula,family,method,runtime,directory
+m2_owf_sstlod_offset_scaled,dataset,"acoustic_detection ~ s(min_dist_owf_scaled, k = 20, bs = ""tp"") + s(elevation_scaled, k = 10, bs = ""tp"") + te(sst_scaled, lod_scaled, k = c(10, 10), bs = c(""tp"", ""cc"")) + s(min_dist_shipwreck_scaled, k = 20, bs = ""tp"")",family,REML,2.86083215872447,04_results/01_models/m2_owf_sstlod_offset_scaled

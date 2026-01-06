@@ -174,6 +174,11 @@ if("copernicusmarine" %in% reticulate::py_list_packages("CopernicusMarine")$pack
 }
 use_virtualenv("CopernicusMarine", required = TRUE)
 cmt <- reticulate::import("copernicusmarine")
+
+# Read .Renviron
+readRenviron(getwd())
+cmems_username <- Sys.getenv("CMEMS_USER")
+cmems_password <- Sys.getenv("CMEMS_PASS")
 cmt$login(cmems_username, cmems_password)
 # query the data
 cmt$subset(

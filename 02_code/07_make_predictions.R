@@ -19,9 +19,8 @@ library(bundle)
 library(terra)
 library(tidymodels)
 ## -----------------------------------------------------------------------------
-# Load model (not sure about the name of saved object)
-# model <- readRDS(file.path(processed_dir, "xgb_minimal_final.rds"))
-model <- readRDS(file.path(mod_dir, "gam_fitted_model.rds"))
+# Load model
+model <- readRDS(file.path(mod_dir, "selected_model.rds"))
 model <- unbundle(model)
 
 ## -----------------------------------------------------------------------------
@@ -33,6 +32,8 @@ lod <- terra::rast(file.path(processed_dir, "lod_rast.nc"))
 OWF_dist <- terra::rast(file.path(processed_dir, "OWF_dist_rast.nc"))
 shipwreck_dist <- terra::rast(file.path(processed_dir, "shipwreck_dist_rast.nc"))
 sst <- terra::rast(file.path(processed_dir, "sst_rast.nc"))
+# include offset 'n_active_tags' as raster layer (spatially constant) - check if log() needs to be used!
+
 
 ## ----prediction-function------------------------------------------------------
 
@@ -42,13 +43,16 @@ lod2 <- c(lod, lod) #because we have two years of data
 r_zero <- OWF_dist  
 values(r_zero) <- 0
 r_zero <- terra::mask(r_zero, OWF_dist) #Now we have a raster with all distance to owf = 0
-#extract model predictor names
-predictor_names <-
-    model |> 
-    extract_fit_engine() |>
-    formula() |>
-    all.vars()
-  
+
+predictor_names <- attr(terms(model), "term.labels")
+
+# #extract model predictor names - from tidymodels workflow
+# predictor_names <-
+#     model |> 
+#     extract_fit_engine() |>
+#     formula() |>
+#     all.vars()
+#   
 predictions <- list()
 predictions_all_owf <- list()
 diff_owf <- list()
@@ -56,7 +60,7 @@ diff_owf <- list()
 
   for(i in 1:nlyr(sst)){
     predictors <- c(bathy, sst[[i]], lod2[[i]], OWF_dist, shipwreck_dist)
-    predictors_all_owf <- c(bathy, sst[[i]], lod2[[i]], r_zero, shipwreck_dist) #use a raster with distance to OWF = 0 to mimick all OWF
+    predictors_all_owf <- c(bathy, sst[[i]], lod2[[i]], r_zero, shipwreck_dist) #use a raster with distance to OWF = 0 to mimic all OWF
     names(predictors) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck")
     names(predictors_all_owf) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck")
   

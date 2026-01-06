@@ -1,0 +1,57 @@
+model_name,smooth,edf,aic,bic,deviance_explained,r_sq,sp_mean,summary_text
+model2,s(min_dist_owf),18.977871566497004,NA,NA,NA,NA,2.7156307763342394e-4,NA
+model2,"te(sst,lod)",79.86696696733392,NA,NA,NA,NA,2.7156307763342394e-4,NA
+model2,model_overall,99.84483853383094,36501.442706455615,37389.95568406439,0.9254103560251858,-5107217445590499e7,2.7156307763342394e-4,"
+Family: Negative Binomial(0.111) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + te(sst, 
+    lod, k = c(10, 10), bs = c(""tp"", ""cc"")) + offset(n_active_tags)
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -45.1725     0.2748  -164.4   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                  edf Ref.df Chi.sq p-value    
+s(min_dist_owf) 18.98  19.00  52441  <2e-16 ***
+te(sst,lod)     79.87  82.15  14791  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  -5.11e+22   Deviance explained = 92.5%
+-REML =  18565  Scale est. = 1         n = 40703"
+model2_scaled,s(min_dist_owf_scaled),18.751785224195668,NA,NA,NA,NA,0.07183210860161468,NA
+model2_scaled,s(elevation_scaled),8.235181433854857,NA,NA,NA,NA,0.07183210860161468,NA
+model2_scaled,"te(sst_scaled,lod_scaled)",63.79268408770965,NA,NA,NA,NA,0.07183210860161468,NA
+model2_scaled,s(min_dist_shipwreck_scaled),16.539660750957427,NA,NA,NA,NA,0.07183210860161468,NA
+model2_scaled,model_overall,108.3193114967176,20551.046860968137,21515.51528784004,0.8103636766177192,0.7308802105656792,0.07183210860161468,"
+Family: Negative Binomial(138.184) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf_scaled, k = 20, bs = ""tp"") + 
+    s(elevation_scaled, k = 10, bs = ""tp"") + te(sst_scaled, lod_scaled, 
+    k = c(10, 10), bs = c(""tp"", ""cc"")) + s(min_dist_shipwreck_scaled, 
+    k = 20, bs = ""tp"")
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -7.3578     0.1942  -37.88   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                                edf Ref.df Chi.sq p-value    
+s(min_dist_owf_scaled)       18.752 18.969 1311.7  <2e-16 ***
+s(elevation_scaled)           8.235  8.801  175.4  <2e-16 ***
+te(sst_scaled,lod_scaled)    63.793 69.233 3091.9  <2e-16 ***
+s(min_dist_shipwreck_scaled) 16.540 17.205  567.6  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  0.731   Deviance explained =   81%
+-REML =  10520  Scale est. = 1         n = 39969"

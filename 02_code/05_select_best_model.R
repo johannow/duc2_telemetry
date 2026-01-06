@@ -33,3 +33,8 @@ objects <- files %>%
 ## ----compare models------------------------------------------------------------
 
 # anovas, AIC, plot from mgcv package, DHARMa package?
+
+
+## save final model object as output ---------------------------------------
+
+## give the model a general name that can be called from chunk07

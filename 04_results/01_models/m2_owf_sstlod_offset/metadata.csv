@@ -1,0 +1,2 @@
+name,dataset,formula,family,method,runtime,directory
+m2_owf_sstlod_offset,dataset,"acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + te(sst, lod, k = c(10, 10), bs = c(""tp"", ""cc"")) + offset(n_active_tags)",family,REML,1.77766610781352,04_results/01_models/m2_owf_sstlod_offset
