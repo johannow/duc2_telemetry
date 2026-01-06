@@ -150,10 +150,28 @@ saveRDS(mod_bundle, file.path(mod_dir, "model2_scaled.rds"))
 export_model_stats(model2_scaled, model_name = "model2_scaled", dir = mod_dir)
 ## ----MODEL 3------------------------------------------------------------
 
-m3_formula <- acoustic_detection ~
+# Step1: formulate model
+model3_formula <- acoustic_detection ~
   s(min_dist_owf, k = 20, bs = "tp") +
   te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
-  s(min_dist_shipwreck, k = 20, bs = "tp")
+  s(elevation, k = 10, bs = "tp") +
+  s(min_dist_shipwreck, k = 20, bs = "tp") +
+  offset(n_active_tags)
+
+# Step 2: train model
+start_time <- Sys.time()
+model3 <- train_gam(formula = model3_formula,
+                family = mgcv::nb(),
+                dataset = chunk03,
+                dir = mod_dir,
+                model_name = "m3_owf_elevation_sstlod_shipwreck_offset")
+end_time <- Sys.time()
+print(end_time - start_time) # runtime: 
+
+# Step 3: First checks and medatada saving
+model3 |> check_and_save_gam(dir = mod_dir,
+                         model_name = "m3_owf_elevation_sstlod_shipwreck_offset")
+
 
 # save metadata of model formula
 m3_formula |>

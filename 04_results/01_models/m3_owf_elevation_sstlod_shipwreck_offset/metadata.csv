@@ -1,0 +1,2 @@
+name,dataset,formula,family,method,runtime,directory
+m3_owf_elevation_sstlod_shipwreck_offset,dataset,"acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + te(sst, lod, k = c(10, 10), bs = c(""tp"", ""cc"")) + s(elevation, k = 10, bs = ""tp"") + s(min_dist_shipwreck, k = 20, bs = ""tp"") + offset(n_active_tags)",family,REML,11.2459936658541,04_results/01_models/m3_owf_elevation_sstlod_shipwreck_offset

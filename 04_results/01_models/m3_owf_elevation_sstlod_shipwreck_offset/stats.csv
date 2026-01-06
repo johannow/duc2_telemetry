@@ -1,0 +1,31 @@
+model_name,smooth,edf,aic,bic,deviance_explained,r_sq,sp_mean,summary_text
+m3_owf_elevation_sstlod_shipwreck_offset,s(min_dist_owf),18.722966255734093,NA,NA,NA,NA,4.338256967689232e-4,NA
+m3_owf_elevation_sstlod_shipwreck_offset,"te(sst,lod)",78.90036293767204,NA,NA,NA,NA,4.338256967689232e-4,NA
+m3_owf_elevation_sstlod_shipwreck_offset,s(elevation),8.538245664459804,NA,NA,NA,NA,4.338256967689232e-4,NA
+m3_owf_elevation_sstlod_shipwreck_offset,s(min_dist_shipwreck),15.976877086873198,NA,NA,NA,NA,4.338256967689232e-4,NA
+m3_owf_elevation_sstlod_shipwreck_offset,model_overall,123.13845194473915,34551.029620224566,35651.079849332295,0.9368780598750137,-48291255928655205e6,4.338256967689232e-4,"
+Family: Negative Binomial(0.138) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ s(min_dist_owf, k = 20, bs = ""tp"") + te(sst, 
+    lod, k = c(10, 10), bs = c(""tp"", ""cc"")) + s(elevation, k = 10, 
+    bs = ""tp"") + s(min_dist_shipwreck, k = 20, bs = ""tp"") + offset(n_active_tags)
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -44.5232     0.3899  -114.2   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                         edf Ref.df  Chi.sq p-value    
+s(min_dist_owf)       18.723 18.935  7805.6  <2e-16 ***
+te(sst,lod)           78.900 81.416 13481.7  <2e-16 ***
+s(elevation)           8.538  8.852   106.4  <2e-16 ***
+s(min_dist_shipwreck) 15.977 16.771   480.5  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  -4.83e+22   Deviance explained = 93.7%
+-REML =  17617  Scale est. = 1         n = 39969"
