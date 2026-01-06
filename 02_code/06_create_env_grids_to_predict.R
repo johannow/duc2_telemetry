@@ -18,7 +18,12 @@ source("02_code/folder_structure.R") # Create relative paths
 library(terra)
 library(lubridate)
 library(stringr)
+library(dplyr)
 library(sf)
+
+## ----parameters----------------------------------------------------------------
+start <- "2021-01-01"
+end <- "2022-12-31"
 
 ## ----load-input---------------------------------------------------------------
 # Load datasets generated in chunk02
@@ -80,10 +85,84 @@ for(i in 1:365){
 }
 lod <- terra::rast(lod)
 lod <- mask(lod, BPNS)
-time(lod) <- seq(ymd('2021-01-01'),ymd('2021-12-31'), by = '1 day')
+time(lod) <- seq(ymd(start),ymd(end), by = '1 day')
 names(lod) <- stringr::str_replace(time(lod), "[0-9]+-", "")
 varnames(lod) <- "Length of day"
 terra::plot(lod[[c(1,90,180,270)]])
+
+
+## ----n_active_tags raster ----------------------------------------------------
+# For the offset in the model, a spatially constant raster with the amount of 
+# active transmitters in the water per time step
+
+n_active_tags <- #number of active tags per timestep
+  readRDS(file.path(processed_dir, 'detections_day.rds')) %>%
+    dplyr::select(time, n_active_tags) %>%
+    dplyr::distinct() %>%
+    dplyr::select(n_active_tags) %>%
+    as.list()
+
+n_active_tags_rast <- vector("list", length = length(n_active_tags))
+n_active_tags_rast <- terra::rast(n_active_tags$n_active_tags)
+
+library(terra)
+library(lubridate)
+
+# Inputs:
+# BPNS          : your existing SpatRaster defining extent, resolution, and CRS
+# start, end    : start and end dates as Date or character (e.g. "2023-01-01")
+# n_active_tags : numeric vector with values for each day in the date range
+
+# 1. Create sequence of dates
+dates <- seq.Date(from = as.Date(start), to = as.Date(end), by = "day")
+stopifnot(length(dates) == length(n_active_tags$n_active_tags))  # sanity check
+
+# 2. Create an empty raster with the same properties as BPNS
+template <- rast(BPNS)
+
+# 3. Set number of layers = number of days
+nlyr(template) <- length(dates)
+
+# 4. Assign layer names as dates (optional, for clarity)
+names(template) <- as.character(dates)
+
+# 5. Fill each layer with the corresponding n_active_tags value (spatially constant)
+# Efficient vectorized filling:
+values(template) <- matrix(rep(n_active_tags, each = ncell(template)), nrow = ncell(template), ncol = length(dates))
+
+# 6. (Optional) Assign time dimension
+time(template) <- dates
+
+# Result: 'template' is your multilayer SpatRaster with daily layers and constant values per layer
+print(template)
+
+# # Fill each raster with the constant value for that day
+# for(i in 1:length(n_active_tags$n_active_tags)) {
+#   
+#   # Create a raster with the same properties as r
+#   n_active_tags_rast[i] <- setValues(temp_rast, n_active_tags[i])
+#   
+#   # Store in list
+#   n_active_tags_list[[i]] <- temp_rast
+# }
+# 
+# # Stack all daily rasters into one SpatRaster
+# n_active_tags_rast <- rast(n_active_tags_list)
+# 
+# # Apply mask if needed
+# n_active_tags_rast <- mask(n_active_tags_rast, BPNS)
+# 
+# # Set time dimension
+# time(n_active_tags_rast) <- seq(ymd(start), ymd(end), by = "1 day")
+# 
+# # Clean layer names to show month-day only (remove year)
+# names(n_active_tags_rast) <- str_replace(time(n_active_tags_rast), "^[0-9]{4}-", "")
+# 
+# # Set variable name for metadata
+# varnames(n_active_tags_rast) <- "Active Tags"
+# 
+# # Plot example layers (e.g., day 1, 90, 180, 270)
+# plot(n_active_tags_rast[[c(1, 90, 180, 270)]])
 
 ## ----write-results------------------------------------------------------------
 #lat
