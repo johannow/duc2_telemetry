@@ -130,7 +130,7 @@ terra::writeCDF(x = predictions_owf_dist,
                 varname = "predicted count",
                 overwrite = TRUE)
 
-# make monthly prediction summaries ---------------------------------------
+# make monthly prediction summaries and save as .png file ---------------------------------------
 
 owf_zero_monthly_median <- 
   aggregate_save_raster(raster_obj = predictions_owf_zero,
@@ -149,14 +149,7 @@ owf_diff_monthly_median <-
                         model_info = "model2_offset")
 
 
-## aggregate predictors
-
-sst_monthly_median <- tapp(
-  sst,
-  index = "months",
-  fun = median,
-  na.rm = TRUE
-)
+## aggregate predictors 
 
 sst_monthly_median <- 
   aggregate_save_raster(raster_obj = sst,
@@ -168,36 +161,4 @@ lod_monthly_median <-
                         model_info = "",
                         dir = processed_dir)
 
-
-# save some plots as documentation ----------------------------------------
-
-# predictors
-png(file.path(pred_dir, "predictors.png"), width = 2000, height = 2000, res = 300)
-plot(predictors)
-dev.off()
-
-# predictors
-png(file.path(pred_dir, "predictors.png"), width = 2000, height = 2000, res = 300)
-plot(predictors)
-dev.off()
-
-# write monthly aggregated files ------------------------------------------
-## TODO: save model metadata, or link which model gave which prediction
-
-terra::writeCDF(x = predictions_owf_one,
-                filename = file.path(pred_dir,"predictions_owf_one.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
-terra::writeCDF(x = predictions_owf_zero,
-                filename = file.path(pred_dir,"predictions_owf_zero.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
-terra::writeCDF(x = diff_owf,
-                filename = file.path(pred_dir,"diff_owf.nc"),
-                varname = "Difference in predicted count",
-                overwrite = TRUE)
-terra::writeCDF(x = predictions_owf_dist,
-                filename = file.path(pred_dir,"predictions_owf_dist.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
 
