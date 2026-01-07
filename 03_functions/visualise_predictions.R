@@ -4,11 +4,13 @@
 #' saves a PNG plot of the aggregated raster,
 #' and writes the aggregated raster to NetCDF.
 #'
-#' @param raster_obj A terra SpatRaster with a valid time dimension.
+#' @param raster_obj A terra SpatRaster.
+#' @param aggregate boolean. If TRUE, then raster_obj will get aggregated. It should then have a valid time dimension.
 #' @param fun Character string giving the aggregation function passed to
 #'   terra::tapp() (e.g. "mean", "median", "sum").
 #' @param index Character string defining the temporal aggregation unit
 #'   (e.g. "months", "years") or a vector compatible with terra::tapp().
+#' @param varname Character. variable written into the spatraster that is saved.
 #' @param dir Character. Directory where output files will be written.
 #' @param model_info Character. Text describing the model; added as a title
 #'   annotation to the output plot.
@@ -40,25 +42,35 @@
 #' @export
 #' 
 aggregate_save_raster <- function(raster_obj,
+                                  aggregate = TRUE,
                                   fun = "median",
                                   index = "months",
-                                  dir = pred_dir,
-                                  model_info) {
+                                  varname = "",
+                                  dir = aggregations_dir,
+                                  model_info = "") {
 
    # 1. aggregate 
-  aggregated_raster <- tapp(
+  if(aggregate){
+  raster <- tapp(
     raster_obj,
     index = index,
     fun = fun,
     na.rm = TRUE
-  )
+  )}else{raster <- raster_obj}
+  
+  #set variable name
+  varnames(raster) <- varname
   
   # file_path <- paste0(dir, "/", varnames(raster_obj) %>% unique(),"_aggr_", fun,"_", index)
-  file_path <- paste0(dir, "/", deparse(substitute(raster_obj)) %>% unique(),"_", fun,"_", index)
+  if(aggregate){
+    file_path <- paste0(dir, "/", deparse(substitute(raster_obj)) %>% unique(),"_", fun,"_", index)
+  }else{
+    file_path <- paste0(dir, "/", deparse(substitute(raster_obj)) %>% unique())
+  }
   
   # 2. save plot
   png(paste0(file_path,".png"), width = 2000, height = 2000, res = 300)
-  plot(aggregated_raster)
+  plot(raster)
   graphics::mtext(model_info,
         side = 3,      # top
         line = 3,
@@ -66,13 +78,14 @@ aggregate_save_raster <- function(raster_obj,
   dev.off()
   
   # 3. save aggregated file
+  if(aggregate){ #only save a .nc file if the raster obj was aggregated (otherwise the raster obj doesn't change)
   suppressWarnings(
-  terra::writeCDF(x = aggregated_raster,
+  terra::writeCDF(x = raster,
                   filename = paste0(file_path,".nc"),
-                  varname = "aggregated predicted count",
-                  overwrite = TRUE))
+                  varname = varname,
+                  overwrite = TRUE))}
   
   # return the aggregated obj
-  return(aggregated_raster)
+  invisible(raster)
   
 }

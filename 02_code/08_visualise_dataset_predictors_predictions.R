@@ -47,6 +47,51 @@ time(sst) <- dates
 n_active_tags <- terra::rast(file.path(processed_dir, "n_active_tags_rast.nc"))
 time(n_active_tags) <- dates
 
+### save predictor raster plots
+predictors_plots_dir <- file.path(processed_dir, "predictors_plots")
+if (!dir.exists(predictors_plots_dir)) dir.create(predictors_plots_dir)
+
+#### temporally constant predictors
+
+aggregate_save_raster(raster_obj = bathy,
+                      aggregate = F,
+                      varname = "elevation",
+                      dir = predictors_plots_dir)
+
+aggregate_save_raster(raster_obj = shipwreck_dist,
+                      aggregate = F,
+                      varname = "min_dist_to_shipwreck",
+                      dir = predictors_plots_dir)
+
+aggregate_save_raster(raster_obj = habitats,
+                      aggregate = F,
+                      varname = "seabed_habitat",
+                      dir = predictors_plots_dir)
+
+aggregate_save_raster(raster_obj = owf_dist,
+                      aggregate = F,
+                      varname = "min_dist_to_owf",
+                      dir = predictors_plots_dir)
+
+
+## aggregate time-variant predictors 
+sst_monthly_median <- 
+  aggregate_save_raster(raster_obj = sst,
+                        varname = "sst",
+                        aggregate = T,
+                        dir = predictors_plots_dir)
+
+lod_monthly_median <- 
+  aggregate_save_raster(raster_obj = lod,
+                        varname = "lod",
+                        dir = predictors_plots_dir)
+
+n_active_tags <- 
+  aggregate_save_raster(raster_obj = n_active_tags,
+                        varname = "n_active_tags",
+                        dir = predictors_plots_dir)
+
+
 ## ----2. load dataset-------------------------------------------------------------------------
 # data <- readRDS(file.path(processed_dir, "output_chunk03.rds"))
 chunk01 <- readRDS(file.path(processed_dir, "output_chunk01.rds"))
@@ -92,13 +137,13 @@ plot(chunk01_monthly_rasters[[20]])
 
 ### 2.3 plot and save
 
-data_monthly_path <- file.path(aggregations_dir, "median_counts_monthly")
-if (!dir.exists(data_monthly_path)) dir.create(data_monthly_path)
+data_monthly_dir <- file.path(aggregations_dir, "median_counts_monthly")
+if (!dir.exists(data_monthly_dir)) dir.create(data_monthly_dir)
 
 for (month_name in names(chunk01_monthly_rasters)) {
   r <- chunk01_monthly_rasters[[month_name]]
   
-  png(paste0(data_monthly_path, "/median_individual_counts_", month_name, ".png"),
+  png(paste0(data_monthly_dir, "/median_individual_counts_", month_name, ".png"),
       width = 800, height = 600)
   plot(r, main = as.character(month_name))
   dev.off()
@@ -110,128 +155,42 @@ chunk01_monthly_rasters_stack <- terra::rast(chunk01_monthly_rasters)
 
 suppressWarnings( # suppress warning about there being no time dimension
 terra::writeCDF(x = chunk01_monthly_rasters_stack,
-                filename = file.path(data_monthly_path,"median_counts_monthly.nc"),
+                filename = file.path(data_monthly_dir,"median_counts_monthly.nc"),
                 varname = "median count",
                 overwrite = TRUE)
 )
 
 
-## old below
-# now we match the name of the selected model to .rds files inside mod_dir
-selected_model_path <- list.files(
-  path = mod_dir,
-  pattern = paste0("^", selected_model_name, "\\.rds$"),
-  recursive = TRUE,
-  full.names = TRUE
-)
+## ----3. load predictions -------------------------------------------------------------------------
+predictions_owf_one <- terra::rast(file.path(pred_dir, "predictions_owf_one.nc"))
+predictions_owf_zero <- terra::rast(file.path(pred_dir, "predictions_owf_zero.nc"))
+predictions_owf_dist <- terra::rast(file.path(pred_dir, "predictions_owf_dist.nc"))
 
-stopifnot(length(selected_model_path) == 1) # sanity check
+### make monthly prediction summaries and save as .png file ---------------------------------------
 
-model <- readRDS(selected_model_path)
-
-
-
-## extract model predictor names -------------------------------------------
-
-predictor_names <- attr(terms(model), "term.labels")
-
-# make predictions --------------------------------------------------------
-
-predictions_owf_one <- list()
-predictions_owf_zero <- list()
-diff_owf <- list()
-# make daily predictions
-for(i in 1:nlyr(sst)){
-  predictors_owf_one <- c(bathy, sst[[i]], lod[[i]], owf_one, shipwreck_dist, n_active_tags[[i]]) # owf raster with 1 everywhere
-  predictors_owf_zero <- c(bathy, sst[[i]], lod[[i]], owf_zero, shipwreck_dist, n_active_tags[[i]]) # owf raster with 0 everywhere
-  names(predictors_owf_one) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck", "n_active_tags")
-  names(predictors_owf_zero) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck", "n_active_tags")
-  
-  # Predict
-  predictions_owf_one[[i]] <- terra::predict(predictors_owf_one, model = model)
-  predictions_owf_zero[[i]] <- terra::predict(predictors_owf_zero, model = model)
-  
-  #the difference in suitability when a owf everywhere vs nowhere
-  diff_owf[[i]] <- predictions_owf_one[[i]] - predictions_owf_zero[[i]]
-}
-predictions_owf_one <- terra::rast(predictions_owf_one)
-time(predictions_owf_one) <- dates
-names(predictions_owf_one) <- dates %>% as.character()
-
-predictions_owf_zero <- terra::rast(predictions_owf_zero)
-time(predictions_owf_zero) <- dates
-names(predictions_owf_zero) <- dates %>% as.character()
-
-diff_owf <- terra::rast(diff_owf)
-time(diff_owf) <- dates
-names(diff_owf) <- dates %>% as.character()
-
-terra::plot(diff_owf)
-
-
-## make predictions for the owf_dist raster --------------------------------
-### in addition to predicting counts of fish for rasters with 0 or 1 owf, we predict for the owf_dist raster layer
-predictions_owf_dist <- list()
-# make daily predictions
-for(i in 1:nlyr(sst)){
-  predictors_owf_dist <- c(bathy, sst[[i]], lod[[i]], owf_dist, shipwreck_dist, n_active_tags[[i]]) # owf raster with dist to owf
-  names(predictors_owf_dist) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck", "n_active_tags")
-  
-  # Predict
-  predictions_owf_dist[[i]] <- terra::predict(predictors_owf_dist, model = model)
-}
-predictions_owf_dist <- terra::rast(predictions_owf_dist)
-time(predictions_owf_dist) <- dates
-names(predictions_owf_dist) <- dates %>% as.character()
-
-# write prediction files -------------------------------------------------------------
-terra::writeCDF(x = predictions_owf_one,
-                filename = file.path(pred_dir,"predictions_owf_one.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
-terra::writeCDF(x = predictions_owf_zero,
-                filename = file.path(pred_dir,"predictions_owf_zero.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
-terra::writeCDF(x = diff_owf,
-                filename = file.path(pred_dir,"diff_owf.nc"),
-                varname = "Difference in predicted count",
-                overwrite = TRUE)
-terra::writeCDF(x = predictions_owf_dist,
-                filename = file.path(pred_dir,"predictions_owf_dist.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
-
-# make monthly prediction summaries and save as .png file ---------------------------------------
-## potentially transfer to chunk08
+predictions_monthly_dir <- file.path(aggregations_dir, "predictions_monthly")
+if (!dir.exists(predictions_monthly_dir)) dir.create(predictions_monthly_dir)
 
 owf_zero_monthly_median <- 
   aggregate_save_raster(raster_obj = predictions_owf_zero,
-                        model_info = selected_model_name)
+                        model_info = selected_model_name,
+                        varname = "monthly predicted count",
+                        dir = predictions_monthly_dir)
 
-owf_one_monthly_median <- predictions_owf_one
-aggregate_save_raster(raster_obj = ,
-                      model_info = selected_model_name)
+owf_one_monthly_median <- 
+  aggregate_save_raster(raster_obj = predictions_owf_one,
+                      model_info = selected_model_name,
+                      varname = "monthly predicted count",
+                      dir = predictions_monthly_dir)
 
 owf_dist_monthly_median <- 
   aggregate_save_raster(raster_obj = predictions_owf_dist,
-                        model_info = selected_model_name)
+                        model_info = selected_model_name,
+                        varname = "monthly predicted count",
+                        dir = predictions_monthly_dir)
 
-owf_diff_monthly_median <- 
-  aggregate_save_raster(raster_obj = diff_owf,
-                        model_info = selected_model_name)
-
-
-## aggregate predictors 
-
-sst_monthly_median <- 
-  aggregate_save_raster(raster_obj = sst,
-                        model_info = "",
-                        dir = processed_dir)
-
-lod_monthly_median <- 
-  aggregate_save_raster(raster_obj = lod,
-                        model_info = "",
-                        dir = processed_dir)
+# owf_diff_monthly_median <- 
+#   aggregate_save_raster(raster_obj = diff_owf,
+#                         model_info = selected_model_name)
 
 
