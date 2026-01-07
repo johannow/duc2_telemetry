@@ -1,11 +1,11 @@
 ##################################################################################
 ##################################################################################
 
-# Author: Jo-Hannes Nowé & Lotte Pohl
-# Email: johannes.nowe@vliz.be
-# Date: 2026-01-06
-# Script Name: ~/duc42_ga/02_code/07_make_predictions.R
-# Script Description: predict on the environmental rasters using the model selected in chunk05
+# Author: Lotte Pohl
+# Email: lotte.pohl@vliz.be
+# Date: 2026-01-07
+# Script Name: ~/duc42_ga/02_code/08_plot_predictions.R
+# Script Description: plot monthly rasters of the dataset and the predictions
 # SETUP ------------------------------------
 cat("\014")                          # Clears the console
 rm(list = ls())                      # Remove all variables of the work space
@@ -79,32 +79,32 @@ predictor_names <- attr(terms(model), "term.labels")
 predictions_owf_one <- list()
 predictions_owf_zero <- list()
 diff_owf <- list()
-  # make daily predictions
-  for(i in 1:nlyr(sst)){
-    predictors_owf_one <- c(bathy, sst[[i]], lod[[i]], owf_one, shipwreck_dist, n_active_tags[[i]]) # owf raster with 1 everywhere
-    predictors_owf_zero <- c(bathy, sst[[i]], lod[[i]], owf_zero, shipwreck_dist, n_active_tags[[i]]) # owf raster with 0 everywhere
-    names(predictors_owf_one) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck", "n_active_tags")
-    names(predictors_owf_zero) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck", "n_active_tags")
-    
-    # Predict
-    predictions_owf_one[[i]] <- terra::predict(predictors_owf_one, model = model)
-    predictions_owf_zero[[i]] <- terra::predict(predictors_owf_zero, model = model)
-    
-    #the difference in suitability when a owf everywhere vs nowhere
-    diff_owf[[i]] <- predictions_owf_one[[i]] - predictions_owf_zero[[i]]
-  }
-  predictions_owf_one <- terra::rast(predictions_owf_one)
-  time(predictions_owf_one) <- dates
-  names(predictions_owf_one) <- dates %>% as.character()
+# make daily predictions
+for(i in 1:nlyr(sst)){
+  predictors_owf_one <- c(bathy, sst[[i]], lod[[i]], owf_one, shipwreck_dist, n_active_tags[[i]]) # owf raster with 1 everywhere
+  predictors_owf_zero <- c(bathy, sst[[i]], lod[[i]], owf_zero, shipwreck_dist, n_active_tags[[i]]) # owf raster with 0 everywhere
+  names(predictors_owf_one) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck", "n_active_tags")
+  names(predictors_owf_zero) <- c("elevation", "sst", "lod", "min_dist_owf", "min_dist_shipwreck", "n_active_tags")
   
-  predictions_owf_zero <- terra::rast(predictions_owf_zero)
-  time(predictions_owf_zero) <- dates
-  names(predictions_owf_zero) <- dates %>% as.character()
+  # Predict
+  predictions_owf_one[[i]] <- terra::predict(predictors_owf_one, model = model)
+  predictions_owf_zero[[i]] <- terra::predict(predictors_owf_zero, model = model)
   
-  diff_owf <- terra::rast(diff_owf)
-  time(diff_owf) <- dates
-  names(diff_owf) <- dates %>% as.character()
-  
+  #the difference in suitability when a owf everywhere vs nowhere
+  diff_owf[[i]] <- predictions_owf_one[[i]] - predictions_owf_zero[[i]]
+}
+predictions_owf_one <- terra::rast(predictions_owf_one)
+time(predictions_owf_one) <- dates
+names(predictions_owf_one) <- dates %>% as.character()
+
+predictions_owf_zero <- terra::rast(predictions_owf_zero)
+time(predictions_owf_zero) <- dates
+names(predictions_owf_zero) <- dates %>% as.character()
+
+diff_owf <- terra::rast(diff_owf)
+time(diff_owf) <- dates
+names(diff_owf) <- dates %>% as.character()
+
 terra::plot(diff_owf)
 
 
@@ -149,8 +149,8 @@ owf_zero_monthly_median <-
                         model_info = selected_model_name)
 
 owf_one_monthly_median <- predictions_owf_one
-  aggregate_save_raster(raster_obj = ,
-                        model_info = selected_model_name)
+aggregate_save_raster(raster_obj = ,
+                      model_info = selected_model_name)
 
 owf_dist_monthly_median <- 
   aggregate_save_raster(raster_obj = predictions_owf_dist,

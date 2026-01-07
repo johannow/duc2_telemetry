@@ -19,12 +19,13 @@ source("02_code/folder_structure.R") # Create relative paths
 ## ----load-packages------------------------------------------------------------
 
 ## ----load trained models into workspace ---------------------------------------
-# the trained model .rds objects of chunk04 are in "./05_results/01_models'
+# the trained model .rds objects of chunk04 are in the folders of "./04_results/01_models'
 
 files <- list.files(
-  path = "./05_results/01_models",
+  path = mod_dir,
   pattern = "\\.rds$",
-  full.names = TRUE
+  full.names = TRUE,
+  recursive = TRUE
 )
 
 objects <- files %>%
@@ -36,5 +37,7 @@ objects <- files %>%
 
 
 ## save final model object as output ---------------------------------------
-
+# approach: save model foldername 
+selected_model_name <- "m3_owf_elevation_sstlod_shipwreck_offset" #make this smarter, take from a list with model names e.g.
+readr::write_lines(selected_model_name, file = file.path(mod_dir, "selected_model_name.csv"))
 ## give the model a general name that can be called from chunk07
