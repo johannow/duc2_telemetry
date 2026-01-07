@@ -17,6 +17,10 @@ source("02_code/folder_structure.R") # Create relative paths
 ## ----libraries-------------------------------------------------------------------------
 library(bundle)
 library(terra)
+library(dplyr)
+library(lubridate)
+library(purrr)
+library(rlang)
 
 ## ----load-functions----------------------------------------------------------------
 list.files(func_dir, pattern = "\\.R$", full.names = TRUE) |>
@@ -28,10 +32,81 @@ end <- "2022-12-31"
 # Create sequence of dates
 dates <- seq.Date(from = as.Date(start), to = as.Date(end), by = "day")
 
-## ----load model-------------------------------------------------------------------------
-# the name of the selected model from chunk05 is saved into 'selected_model_name.csv' inside mod_dir
-selected_model_name <- readLines(file.path(mod_dir, "selected_model_name.csv"))
+## ----1. load predictors-------------------------------------------------------------------------
+bathy <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
+habitats <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
+lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
+lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
+lod <- terra::rast(file.path(processed_dir, "lod_rast.nc"))
+# define the time for time-variant predictors layers
+time(lod) <- dates
+owf_dist <- terra::rast(file.path(processed_dir, "OWF_dist_rast.nc"))
+shipwreck_dist <- terra::rast(file.path(processed_dir, "shipwreck_dist_rast.nc"))
+sst <- terra::rast(file.path(processed_dir, "sst_rast.nc"))
+time(sst) <- dates
+n_active_tags <- terra::rast(file.path(processed_dir, "n_active_tags_rast.nc"))
+time(n_active_tags) <- dates
 
+## ----2. load dataset-------------------------------------------------------------------------
+# data <- readRDS(file.path(processed_dir, "output_chunk03.rds"))
+chunk01 <- readRDS(file.path(processed_dir, "output_chunk01.rds"))
+
+### 2.1 summarise dataset per monthyear (using the median count of individuals)
+chunk01_monthly <- chunk01 %>%
+  dplyr::mutate(
+    year_month = floor_date(time, unit = "month")
+  ) %>%
+  dplyr::group_by(year_month, station_name, geometry) %>%
+  dplyr::summarise(
+    count_median = median(count, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  st_as_sf()
+
+### 2.2 rasterise
+
+r_template <- rast(sst[[1]])
+values(r_template) <- NA
+
+chunk01_vect <- vect(chunk01_monthly)
+
+chunk01_monthly_rasters <- chunk01_monthly %>%
+  distinct(year_month) %>%
+  pull(year_month) %>%
+  set_names() %>%
+  purrr::map(~ {
+    v <- chunk01_vect[chunk01_vect$year_month == .x, ]
+    
+    rasterize(
+      v,
+      r_template,
+      field = "count_median",
+      fun = sum,
+      background = NA
+    ) %>%
+      `varnames<-`("count_median")
+  })
+
+
+# checks
+plot(chunk01_monthly_rasters[[20]])
+
+### 2.3 plot and save
+
+data_monthly_path <- file.path(plot_dir, "data_monthly")
+if (!dir.exists(data_monthly_path)) dir.create(data_monthly_path)
+
+for (month_name in names(chunk01_monthly_rasters)) {
+  r <- chunk01_monthly_rasters[[month_name]]
+  
+  png(paste0(data_monthly_path, "/median_individual_counts_", month_name, ".png"),
+      width = 800, height = 600)
+  plot(r, main = as.character(month_name))
+  dev.off()
+}
+
+
+## old below
 # now we match the name of the selected model to .rds files inside mod_dir
 selected_model_path <- list.files(
   path = mod_dir,
@@ -44,31 +119,7 @@ stopifnot(length(selected_model_path) == 1) # sanity check
 
 model <- readRDS(selected_model_path)
 
-## ----load prediction rasters-------------------------------------------------------------------------
-bathy <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
-habitats <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
-lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
-lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
-lod <- terra::rast(file.path(processed_dir, "lod_rast.nc"))
-time(lod) <- dates
-owf_dist <- terra::rast(file.path(processed_dir, "OWF_dist_rast.nc"))
-shipwreck_dist <- terra::rast(file.path(processed_dir, "shipwreck_dist_rast.nc"))
-sst <- terra::rast(file.path(processed_dir, "sst_rast.nc"))
-time(sst) <- dates
-n_active_tags <- terra::rast(file.path(processed_dir, "n_active_tags_rast.nc"))
-time(n_active_tags) <- dates
 
-
-##----resample relevant raster layers------------------------------------------------------------------
-bathy <- terra::resample(bathy, sst) #need to align to allow predictions
-
-## make 0 and 1 OWF raster layer ----------------------------------------------
-owf_zero <- owf_dist  
-values(owf_zero) <- 0
-owf_zero <- terra::mask(owf_zero, owf_dist) #Now we have a raster with all distance to owf = 0
-owf_one <- owf_dist
-values(owf_one) <- 1
-owf_one <- terra::mask(owf_one, owf_dist) #Now we have a raster with all distance to owf = 0
 
 ## extract model predictor names -------------------------------------------
 
