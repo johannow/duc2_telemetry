@@ -58,7 +58,7 @@ chunk01_monthly <- chunk01 %>%
   ) %>%
   dplyr::group_by(year_month, station_name, geometry) %>%
   dplyr::summarise(
-    count_median = median(count, na.rm = TRUE),
+    "count_median" = median(count, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   st_as_sf()
@@ -84,16 +84,15 @@ chunk01_monthly_rasters <- chunk01_monthly %>%
       fun = sum,
       background = NA
     ) %>%
-      `varnames<-`("count_median")
+      `varnames<-`("median count")
   })
-
 
 # checks
 plot(chunk01_monthly_rasters[[20]])
 
 ### 2.3 plot and save
 
-data_monthly_path <- file.path(plot_dir, "data_monthly")
+data_monthly_path <- file.path(aggregations_dir, "median_counts_monthly")
 if (!dir.exists(data_monthly_path)) dir.create(data_monthly_path)
 
 for (month_name in names(chunk01_monthly_rasters)) {
@@ -104,6 +103,17 @@ for (month_name in names(chunk01_monthly_rasters)) {
   plot(r, main = as.character(month_name))
   dev.off()
 }
+
+### 4. write raster
+# stack the list into one SpatRaster
+chunk01_monthly_rasters_stack <- terra::rast(chunk01_monthly_rasters)
+
+suppressWarnings( # suppress warning about there being no time dimension
+terra::writeCDF(x = chunk01_monthly_rasters_stack,
+                filename = file.path(data_monthly_path,"median_counts_monthly.nc"),
+                varname = "median count",
+                overwrite = TRUE)
+)
 
 
 ## old below

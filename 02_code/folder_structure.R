@@ -4,7 +4,8 @@ code_dir <- file.path("02_code")
 func_dir     <- file.path("03_functions")
 mod_dir  <- file.path("04_results", "01_models")
 pred_dir  <- file.path("04_results", "02_predictions")
-plot_dir  <- file.path("04_results", "03_plots")
+# plot_dir  <- file.path("04_results", "03_plots")
+aggregations_dir  <- file.path("04_results", "03_monthly_aggregations")
 
 folder_struct <- c(raw_dir,
                  processed_dir,
@@ -12,7 +13,8 @@ folder_struct <- c(raw_dir,
                  func_dir,
                  mod_dir,
                  pred_dir,
-                 plot_dir)
+                 # plot_dir,
+                 aggregations_dir)
 
 
 # #Check for their existence, create if missing

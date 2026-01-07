@@ -57,5 +57,8 @@ rsconnect/
 #no nc files
 *.nc
 
+#no png files in the results
+04_results/**/*.png
+
 #renv
 renv/library/
