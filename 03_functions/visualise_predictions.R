@@ -14,6 +14,7 @@
 #' @param dir Character. Directory where output files will be written.
 #' @param model_info Character. Text describing the model; added as a title
 #'   annotation to the output plot.
+#' @param range c(max,min). Range that raster is plotted.
 #'
 #' @details
 #' The function performs three steps:
@@ -48,7 +49,8 @@ aggregate_save_raster <- function(raster_obj,
                                   varname = "",
                                   dir = aggregations_dir,
                                   model_info = "",
-                                  filename = NULL) {
+                                  filename = NULL,
+                                  range = NULL) {
 
    # 1. aggregate 
   if(aggregate){
@@ -76,7 +78,9 @@ aggregate_save_raster <- function(raster_obj,
   
   # 2. save plot
   png(paste0(file_path,".png"), width = 2000, height = 2000, res = 300)
-  plot(raster)
+  if(is.null(range)){
+    plot(raster)
+  }else{terra::plot(raster, range = range)}
   graphics::mtext(model_info,
         side = 3,      # top
         line = 3,
