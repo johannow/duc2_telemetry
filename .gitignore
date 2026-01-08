@@ -38,6 +38,8 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+# s3 credentials
+02_code/init_s3.R
 
 # pkgdown site
 docs/
