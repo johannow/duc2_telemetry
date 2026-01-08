@@ -1,0 +1,2 @@
+name,dataset,formula,family,method,runtime,directory
+m4_sstlod_xy_shipwreck_offset_outsideOWF,dataset,"acoustic_detection ~ te(sst, lod, k = c(10, 10), bs = c(""tp"", ""cc"")) + s(y_m, x_m, bs = ""tp"") + s(min_dist_shipwreck, k = 20, bs = ""tp"") + offset(n_active_tags)",family,REML,18.0345461209615,04_results/01_models/m4_sstlod_xy_shipwreck_offset_outsideOWF

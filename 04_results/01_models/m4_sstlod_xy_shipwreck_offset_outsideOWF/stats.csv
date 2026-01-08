@@ -1,0 +1,29 @@
+model_name,smooth,edf,aic,bic,deviance_explained,r_sq,sp_mean,summary_text
+m4_sstlod_xy_shipwreck_offset_outsideOWF,"te(sst,lod)",80.90344656513405,NA,NA,NA,NA,2.5064033584685385e-4,NA
+m4_sstlod_xy_shipwreck_offset_outsideOWF,"s(y_m,x_m)",18.91155011029727,NA,NA,NA,NA,2.5064033584685385e-4,NA
+m4_sstlod_xy_shipwreck_offset_outsideOWF,s(min_dist_shipwreck),15.953154477507905,NA,NA,NA,NA,2.5064033584685385e-4,NA
+m4_sstlod_xy_shipwreck_offset_outsideOWF,model_overall,116.76815115293923,28585.83517963925,29599.243610469937,0.9312523785728294,-13534285304627642e3,2.5064033584685385e-4,"
+Family: Negative Binomial(0.143) 
+Link function: log 
+
+Formula:
+acoustic_detection ~ te(sst, lod, k = c(10, 10), bs = c(""tp"", 
+    ""cc"")) + s(y_m, x_m, bs = ""tp"") + s(min_dist_shipwreck, k = 20, 
+    bs = ""tp"") + offset(n_active_tags)
+
+Parametric coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -257.43      44.65  -5.766 8.12e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Approximate significance of smooth terms:
+                        edf Ref.df Chi.sq p-value    
+te(sst,lod)           80.90  83.08  18089  <2e-16 ***
+s(y_m,x_m)            18.91  19.85   4602  <2e-16 ***
+s(min_dist_shipwreck) 15.95  15.99   2111  <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+R-sq.(adj) =  -1.35e+19   Deviance explained = 93.1%
+-REML =  14658  Scale est. = 1         n = 32219"

@@ -264,7 +264,7 @@ model4_insideOWF <- train_gam(formula = model4_formula, # runtime 35secs
                     model_name = "m4_sstlod_xy_shipwreck_offset_insideOWF")
 
 
-model4_outsideOWF <- train_gam(formula = model4_formula,
+model4_outsideOWF <- train_gam(formula = model4_formula, # runtime 18min
                               family = mgcv::nb(),
                               dataset = chunk03_outsideOWF,
                               dir = mod_dir,
