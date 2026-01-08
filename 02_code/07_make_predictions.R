@@ -88,21 +88,40 @@ chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds"))
 ##----resample relevant raster layers------------------------------------------------------------------
 bathy <- terra::resample(bathy, sst) #need to align to allow predictions
 
-x_m <- rasterize(
-  vect(chunk03),
-  bathy,
-  field = "x_m",
-  fun = mean
-)
-varnames(x_m) <- "x_m"
+# 1. reference raster in EPSG:4326
+r_4326 <- bathy
 
-y_m <- rasterize(
-  vect(chunk03),
-  bathy,
-  field = "y_m",
-  fun = mean
-)
-varnames(y_m) <- "y_m"
+# 2. project grid to EPSG:3035
+r_3035 <- project(r_4326, "EPSG:3035")
+
+# 3. create projected coordinates (meters)
+x_m_3035 <- init(r_3035, "x")
+y_m_3035 <- init(r_3035, "y")
+
+test_y <- bathy %>% project("EPSG:3035") %>% init("y") %>% mask(shipwreck_dist)
+test_x <- bathy %>% project("EPSG:3035") %>% init("x") %>% mask(shipwreck_dist)
+
+# 4. project values back to 4326 grid
+x_m_4326 <- project(x_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
+y_m_4326 <- project(y_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
+
+ext(sst[[1]]) == ext(y_m_4326)
+
+# x_m <- rasterize(
+#   vect(chunk03),
+#   bathy,
+#   field = "x_m",
+#   fun = mean
+# )
+# varnames(x_m) <- "x_m"
+# 
+# y_m <- rasterize(
+#   vect(chunk03),
+#   bathy,
+#   field = "y_m",
+#   fun = mean
+# )
+# varnames(y_m) <- "y_m"
 
 # x_m <- terra::resample(x_m, sst)
 # test <- project(x_m, bathy)
@@ -126,8 +145,8 @@ predictions_inside_owf <- list()
 
 # make daily predictions
 for(i in 1:nlyr(sst)){
-  predictors <- c(bathy, sst[[i]], lod[[i]], shipwreck_dist, y_m, x_m, n_active_tags[[i]]) # owf raster with 1 everywhere
-  names(predictors) <- c("elevation", "sst", "lod", "min_dist_shipwreck", "lat", "lon", "n_active_tags")
+  predictors <- c(bathy, sst[[i]], lod[[i]], shipwreck_dist, y_m_4326, x_m_4326, n_active_tags[[i]])
+  names(predictors) <- c("elevation", "sst", "lod", "min_dist_shipwreck", "y_m", "x_m", "n_active_tags")
  
   # Predict
   predictions_inside_owf[[i]] <- terra::predict(predictors, model = model_insideOWF)
@@ -142,9 +161,9 @@ predictions_outside_owf <- list()
 
 # make daily predictions
 for(i in 1:nlyr(sst)){
-  predictors <- c(bathy, sst[[i]], lod[[i]], shipwreck_dist, y_m, x_m, n_active_tags[[i]]) # owf raster with 1 everywhere
-  names(predictors) <- c("elevation", "sst", "lod", "min_dist_shipwreck", "lat", "lon", "n_active_tags")
-  
+  predictors <- c(bathy, sst[[i]], lod[[i]], shipwreck_dist, y_m_4326, x_m_4326, n_active_tags[[i]])
+  names(predictors) <- c("elevation", "sst", "lod", "min_dist_shipwreck", "y_m", "x_m", "n_active_tags")
+ 
   # Predict
   predictions_outside_owf[[i]] <- terra::predict(predictors, model = model_outsideOWF)
 }
@@ -228,37 +247,3 @@ terra::writeCDF(x = predictions_outside_owf,
 #                 filename = file.path(pred_dir,"predictions_owf_dist.nc"),
 #                 varname = "predicted count",
 #                 overwrite = TRUE)
-
-# make monthly prediction summaries and save as .png file ---------------------------------------
-## potentially transfer to chunk08
-
-owf_zero_monthly_median <- 
-  aggregate_save_raster(raster_obj = predictions_owf_zero,
-                        model_info = selected_model_name)
-
-owf_one_monthly_median <- predictions_owf_one
-  aggregate_save_raster(raster_obj = ,
-                        model_info = selected_model_name)
-
-owf_dist_monthly_median <- 
-  aggregate_save_raster(raster_obj = predictions_owf_dist,
-                        model_info = selected_model_name)
-
-owf_diff_monthly_median <- 
-  aggregate_save_raster(raster_obj = diff_owf,
-                        model_info = selected_model_name)
-
-
-## aggregate predictors 
-
-sst_monthly_median <- 
-  aggregate_save_raster(raster_obj = sst,
-                        model_info = "",
-                        dir = processed_dir)
-
-lod_monthly_median <- 
-  aggregate_save_raster(raster_obj = lod,
-                        model_info = "",
-                        dir = processed_dir)
-
-

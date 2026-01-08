@@ -162,32 +162,52 @@ terra::writeCDF(x = chunk01_monthly_rasters_stack,
 
 
 ## ----3. load predictions -------------------------------------------------------------------------
-predictions_owf_one <- terra::rast(file.path(pred_dir, "predictions_owf_one.nc"))
-predictions_owf_zero <- terra::rast(file.path(pred_dir, "predictions_owf_zero.nc"))
-predictions_owf_dist <- terra::rast(file.path(pred_dir, "predictions_owf_dist.nc"))
+predictions_inside_owf <- terra::rast(file.path(pred_dir, "predictions_inside_owf.nc"))
+predictions_outside_owf <- terra::rast(file.path(pred_dir, "predictions_outside_owf.nc"))
+
+# predictions_owf_one <- terra::rast(file.path(pred_dir, "predictions_owf_one.nc"))
+# predictions_owf_zero <- terra::rast(file.path(pred_dir, "predictions_owf_zero.nc"))
+# predictions_owf_dist <- terra::rast(file.path(pred_dir, "predictions_owf_dist.nc"))
 
 ### make monthly prediction summaries and save as .png file ---------------------------------------
+
+## ----load model infos-------------------------------------------------------------------------
+# the name of the selected model from chunk05 is saved into 'selected_model_name.csv' inside mod_dir
+selected_model_name1 <- readLines(file.path(mod_dir, "selected_model_name.csv"))
+selected_model_name2 <- readLines(file.path(mod_dir, "selected_model_name2.csv"))
 
 predictions_monthly_dir <- file.path(aggregations_dir, "predictions_monthly")
 if (!dir.exists(predictions_monthly_dir)) dir.create(predictions_monthly_dir)
 
-owf_zero_monthly_median <- 
-  aggregate_save_raster(raster_obj = predictions_owf_zero,
-                        model_info = selected_model_name,
+inside_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = predictions_inside_owf,
+                        model_info = selected_model_name1,
                         varname = "monthly predicted count",
                         dir = predictions_monthly_dir)
 
-owf_one_monthly_median <- 
-  aggregate_save_raster(raster_obj = predictions_owf_one,
-                      model_info = selected_model_name,
-                      varname = "monthly predicted count",
-                      dir = predictions_monthly_dir)
-
-owf_dist_monthly_median <- 
-  aggregate_save_raster(raster_obj = predictions_owf_dist,
-                        model_info = selected_model_name,
+outside_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = predictions_outside_owf,
+                        model_info = selected_model_name2,
                         varname = "monthly predicted count",
                         dir = predictions_monthly_dir)
+
+# owf_zero_monthly_median <- 
+#   aggregate_save_raster(raster_obj = predictions_owf_zero,
+#                         model_info = selected_model_name,
+#                         varname = "monthly predicted count",
+#                         dir = predictions_monthly_dir)
+# 
+# owf_one_monthly_median <- 
+#   aggregate_save_raster(raster_obj = predictions_owf_one,
+#                       model_info = selected_model_name,
+#                       varname = "monthly predicted count",
+#                       dir = predictions_monthly_dir)
+# 
+# owf_dist_monthly_median <- 
+#   aggregate_save_raster(raster_obj = predictions_owf_dist,
+#                         model_info = selected_model_name,
+#                         varname = "monthly predicted count",
+#                         dir = predictions_monthly_dir)
 
 # owf_diff_monthly_median <- 
 #   aggregate_save_raster(raster_obj = diff_owf,
