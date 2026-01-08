@@ -65,7 +65,9 @@ bathy <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
 habitats <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
 lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
 lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
-x_m <- project(lon, "EPSG:3035") # transform to m
+x_m <- lon
+values(x_m) <- values(init(project(lon, "EPSG:3035"), "x"))
+# x_m <- project(lon, "EPSG:3035") # transform to m
 # crs(x_m)
 # res(x_m)  # now in meters
 y_m <- project(lat, "EPSG:3035") # transform to m
@@ -79,9 +81,31 @@ time(sst) <- dates
 n_active_tags <- terra::rast(file.path(processed_dir, "n_active_tags_rast.nc"))
 time(n_active_tags) <- dates
 
+### make y_m and x_m rasters
+chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds"))
+
 
 ##----resample relevant raster layers------------------------------------------------------------------
 bathy <- terra::resample(bathy, sst) #need to align to allow predictions
+
+x_m <- rasterize(
+  vect(chunk03),
+  bathy,
+  field = "x_m",
+  fun = mean
+)
+varnames(x_m) <- "x_m"
+
+y_m <- rasterize(
+  vect(chunk03),
+  bathy,
+  field = "y_m",
+  fun = mean
+)
+varnames(y_m) <- "y_m"
+
+# x_m <- terra::resample(x_m, sst)
+# test <- project(x_m, bathy)
 
 ## make 0 and 1 OWF raster layer ----------------------------------------------
 owf_zero <- owf_dist  
