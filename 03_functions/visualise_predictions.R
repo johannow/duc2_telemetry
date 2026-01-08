@@ -47,7 +47,8 @@ aggregate_save_raster <- function(raster_obj,
                                   index = "months",
                                   varname = "",
                                   dir = aggregations_dir,
-                                  model_info = "") {
+                                  model_info = "",
+                                  filename = NULL) {
 
    # 1. aggregate 
   if(aggregate){
@@ -61,11 +62,16 @@ aggregate_save_raster <- function(raster_obj,
   #set variable name
   varnames(raster) <- varname
   
-  # file_path <- paste0(dir, "/", varnames(raster_obj) %>% unique(),"_aggr_", fun,"_", index)
+  # if filename is explicitly stated
+  if(is.null(filename)){
+    filename <- deparse(substitute(raster_obj)) # set the name of the raster obj as filename
+    }
+  
+  # make filepath
   if(aggregate){
-    file_path <- paste0(dir, "/", deparse(substitute(raster_obj)) %>% unique(),"_", fun,"_", index)
+    file_path <- paste0(dir, "/", filename %>% unique(),"_", fun,"_", index)
   }else{
-    file_path <- paste0(dir, "/", deparse(substitute(raster_obj)) %>% unique())
+    file_path <- paste0(dir, "/", filename %>% unique())
   }
   
   # 2. save plot

@@ -230,6 +230,23 @@ terra::writeCDF(x = predictions_outside_owf,
                 filename = file.path(pred_dir,"predictions_outside_owf.nc"),
                 varname = "predicted count",
                 overwrite = TRUE)
+## aggregate per month and write file
+
+inside_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = predictions_inside_owf,
+                        model_info = selected_model_name1,
+                        varname = "monthly predicted count",
+                        dir = processed_dir,
+                        filename = "output_chunk07_insideOWF")
+
+outside_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = predictions_outside_owf,
+                        model_info = selected_model_name2,
+                        varname = "monthly predicted count",
+                        dir = processed_dir,
+                        filename = "output_chunk07_outsideOWF")
+
+
 # # old
 # terra::writeCDF(x = predictions_owf_one,
 #                 filename = file.path(pred_dir,"predictions_owf_one.nc"),
