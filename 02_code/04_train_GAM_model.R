@@ -34,10 +34,19 @@ list.files(func_dir, pattern = "\\.R$", full.names = TRUE) |>
 ## ----load-data----------------------------------------------------------------
 chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds")) 
 
-# make quick subset for faster model testing
-chunk03_subset <- 
+# # make quick subset for faster model testing
+# chunk03_subset <- 
+#   chunk03 |>
+#     dplyr::slice_sample(n = (nrow(chunk03)/3) |> round())
+
+## make subset for data within and outside OWF
+chunk03_insideOWF <- 
   chunk03 |>
-    dplyr::slice_sample(n = (nrow(chunk03)/3) |> round())
+    dplyr::filter(OWF == TRUE)
+
+chunk03_outsideOWF <- 
+  chunk03 |>
+  dplyr::filter(OWF == FALSE)
 
 ## ----MODEL 1------------------------------------------------------------
 
@@ -236,6 +245,45 @@ start_time <- Sys.time()
 #                         data = chunk03)
 # end_time <- Sys.time()
 # print(end_time - start_time)
+
+## ----MODEL 4 - inside & outside OWF subsets ------------------------------------------------------------
+# Step1: formulate model
+model4_formula <- acoustic_detection ~
+  te(sst, lod, k = c(10,10), bs = c("tp", "cc")) +
+  s(y_m, x_m, bs = "tp") + 
+  # s(elevation, k = 10, bs = "tp") +
+  s(min_dist_shipwreck, k = 20, bs = "tp") +
+  # potentially include habitat at some point
+  offset(n_active_tags)
+
+# Step 2: train models
+model4_insideOWF <- train_gam(formula = model4_formula, # runtime 35secs
+                    family = mgcv::nb(),
+                    dataset = chunk03_insideOWF,
+                    dir = mod_dir,
+                    model_name = "m4_sstlod_xy_shipwreck_offset_insideOWF")
+
+
+model4_outsideOWF <- train_gam(formula = model4_formula,
+                              family = mgcv::nb(),
+                              dataset = chunk03_outsideOWF,
+                              dir = mod_dir,
+                              model_name = "m4_sstlod_xy_shipwreck_offset_outsideOWF")
+
+
+# Step 3: First checks and medatada saving
+model4_insideOWF |> check_and_save_gam(dir = mod_dir,
+                             model_name = "m4_sstlod_xy_shipwreck_offset_insideOWF")
+model4_outsideOWF |> check_and_save_gam(dir = mod_dir,
+                                       model_name = "m4_sstlod_xy_shipwreck_offset_outsideOWF")
+
+
+# save metadata of model formula
+m3_formula |>
+  deparse1(collapse = "") |>
+  as_tibble() |>
+  readr::write_csv(file = file.path(mod_dir, "model3_formula.csv"))
+
 ## ----save-results-------------------------------------------------------------
 # bundle and then save
 mod_bundle <- bundle::bundle(gam_fitted_model)
