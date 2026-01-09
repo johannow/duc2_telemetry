@@ -42,50 +42,23 @@ BPNS <- sf::st_read(file.path(raw_dir, "BPNS.gpkg"))
 
 ## ----lonlat-rasters-----------------------------------------------------------
 
-## Explanation: we need raster layers in cRS 4326 but with values that represent the lat/lon in metres (for accurate predictions)
-# 1. reference raster in EPSG:4326
-r_4326 <- bathy
+## Explanation: we need raster layers in CRS 4326 but with values that represent the lat/lon in metres (for accurate predictions)
 
-# 2. project grid to EPSG:3035
-r_3035 <- terra::project(r_4326, "EPSG:3035")
+# project grid to EPSG:3035
+r_3035 <- terra::project(elevation, "EPSG:3035")
 
-# 3. create projected coordinates (meters)
+# create projected coordinates (meters)
 x_m_3035 <- init(r_3035, "x")
 y_m_3035 <- init(r_3035, "y")
 
 # test_y <- bathy %>% project("EPSG:3035") %>% init("y") %>% mask(shipwreck_dist)
 # test_x <- bathy %>% project("EPSG:3035") %>% init("x") %>% mask(shipwreck_dist)
 
-# 4. project values back to 4326 grid
-x_m_4326 <- project(x_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
-y_m_4326 <- project(y_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
+# project values back to 4326 grid
+x_m_4326 <- terra::project(x_m_3035, elevation, method = "near") %>% terra::mask(elevation)
+y_m_4326 <- terra::project(y_m_3035, elevation, method = "near") %>% terra::mask(elevation)
 
-## OLD
-# r <- sst_daily[[1]] #thetao raster to have same resolution, ncells etc.
-# 
-# # Get cell numbers
-# cells <- 1:terra::ncell(r)
-# 
-# # Get longitude and latitude values for each cell
-# long_vals <- terra::xFromCell(r, cells)
-# lat_vals <- terra::yFromCell(r, cells)
-# 
-# # Create new rasters for longitude and latitude
-# lon_raster <- setValues(rast(r), long_vals)
-# lon_raster <- terra::mask(lon_raster, vect(BPNS))
-# names(lon_raster) <- "Longitude"
-# varnames(lon_raster) <- "Longitude"
-# 
-# lat_raster <- setValues(rast(r), lat_vals)
-# lat_raster <- terra::mask(lat_raster, vect(BPNS))
-# names(lat_raster) <- "Latitude"
-# varnames(lat_raster) <- "Latitude"
-
-# # Plot
-# terra::plot(lon_raster, main = "Longitude")
-# terra::plot(lat_raster, main = "Latitude")
-
-
+rm(y_m_3035, x_m_3035)
 
 ## ----distance-rasters---------------------------------------------------------
 OWF_dist_rast <- terra::distance(r, OWF)
