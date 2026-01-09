@@ -41,29 +41,115 @@ bathy <- terra::rast(file.path(constant_predictors_dir, "bathy_rast.nc"))
 habitats <- terra::rast(file.path(constant_predictors_dir, "habitats_rast.tif"))
 owf_dist <- terra::rast(file.path(constant_predictors_dir, "OWF_dist_rast.nc"))
 shipwreck_dist <- terra::rast(file.path(constant_predictors_dir, "shipwreck_dist_rast.nc"))
-# lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
-# lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
+# lat
+y_m_4326 <- terra::rast(file.path(processed_dir,"y_m_4326.nc"))
+#lon
+x_m_4326 <- terra::rast(file.path(processed_dir,"x_m_4326.nc"))
 
 # per-month aggregated layers of time-variant rasters are stored in the aggregations_dir
 predictors_monthly_dir <- file.path(aggregations_dir, "predictors_monthly")
 
-lod_median_months <- terra::rast(file.path(predictors_monthly_dir, "lod_median_months.nc"))
-sst_median_months <- terra::rast(file.path(predictors_monthly_dir, "sst_median_months.nc"))
-n_active_tags_median_months <- terra::rast(file.path(predictors_monthly_dir, "n_active_tags_median_months.nc"))
+
+lod_median_months <- terra::rast(file.path(predictors_monthly_dir, "lod_median_months.nc")) %>% suppressWarnings()
+sst_median_months <- terra::rast(file.path(predictors_monthly_dir, "sst_median_months.nc")) %>% suppressWarnings()
+n_active_tags_median_months <- terra::rast(file.path(predictors_monthly_dir, "n_active_tags_median_months.nc")) %>% suppressWarnings()
 
 ### ACOUSTIC TELEMETRY DATA ###
 data_monthly_dir <- file.path(aggregations_dir, "median_counts_monthly")
 
+counts_median_months <- terra::rast(file.path(data_monthly_dir, "chunk01_counts_median_months.nc")) %>% suppressWarnings()
+
 ### PREDICTIONS ###
 predictions_monthly_dir <- file.path(aggregations_dir, "predictions_monthly")
 
-predictions_inside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_inside_owf_median_months.nc"))
-predictions_outside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_inside_owf_median_months.nc"))
-predictions_inside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_inside_owf_median_months.nc"))
+predictions_inside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_inside_owf_median_months.nc")) %>% suppressWarnings()
+predictions_outside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_outside_owf_median_months.nc")) %>% suppressWarnings()
+# diff_owf <- terra::rast(file.path(pred_dir, "diff_owf.nc")) %>% suppressWarnings() #does not work yet
+# temporary solution
+diff_owf <- suppressWarnings(predictions_inside_owf_median_months - predictions_outside_owf_median_months)
+terra::writeCDF(x = diff_owf,
+                filename = file.path(pred_dir, "diff_owf.nc"),
+                varname = "difference in predicted count",
+                overwrite = TRUE) %>% suppressWarnings()
+
+## ----2. convert raster layers into stars obj -------------------------------------------------------------------------
+
+### PREDICTORS ####
+s_bathy <- stars::st_as_stars(bathy)
+names(s_bathy) <- "elevation"
+attr(s_bathy, "units") <- "m"
+attr(s_bathy, "description") <- "bathymetry of the Belgian Part of the North Sea"
+
+s_habitats <- stars::st_as_stars(habitats)
+names(s_habitats) <- "habitat category"
+attr(s_habitats, "units") <- ""
+attr(s_habitats, "description") <- "seabed habitat categories of the Belgian Part of the North Sea"
+
+s_owf_dist <- stars::st_as_stars(owf_dist)
+names(s_owf_dist) <- "distance to closest offshore wind farm"
+attr(s_owf_dist, "units") <- "m"
+attr(s_owf_dist, "description") <- "distance to closest owf in the Belgian Part of the North Sea"
+
+s_shipwreck_dist <- stars::st_as_stars(shipwreck_dist)
+names(s_shipwreck_dist) <- "distance to closest shipwreck"
+attr(s_shipwreck_dist, "units") <- "m"
+attr(s_shipwreck_dist, "description") <- "distance to closest shipwreck in the Belgian Part of the North Sea"
+
+s_y_m_4326 <- stars::st_as_stars(y_m_4326)
+names(s_y_m_4326) <- "Latitude"
+attr(s_y_m_4326, "units") <- "m"
+attr(s_y_m_4326, "description") <- "Latitude in EPSG:3035"
+
+s_x_m_4326 <- stars::st_as_stars(x_m_4326)
+names(s_x_m_4326) <- "Longitude"
+attr(s_x_m_4326, "units") <- "m"
+attr(s_x_m_4326, "description") <- "Longitude in EPSG:3035"
+
+s_lod_median_months <- stars::st_as_stars(lod_median_months) %>% suppressWarnings()
+names(s_lod_median_months) <- "median lod"
+attr(s_lod_median_months, "units") <- "h"
+attr(s_lod_median_months, "description") <- "median lod per month"
+
+s_sst_median_months <- stars::st_as_stars(sst_median_months) %>% suppressWarnings()
+names(s_sst_median_months) <- "median sst"
+attr(s_sst_median_months, "units") <- "Degree Celcius"
+attr(s_sst_median_months, "description") <- "median sst per month"
+
+s_n_active_tags_median_months <- stars::st_as_stars(n_active_tags_median_months) %>% suppressWarnings()
+names(s_n_active_tags_median_months) <- "median n_active_tags"
+attr(s_n_active_tags_median_months, "units") <- "count"
+attr(s_n_active_tags_median_months, "description") <- "median number of active acoustic transmitters per month"
+
+### DATA ###
+s_counts_median_months <- stars::st_as_stars(counts_median_months) %>% suppressWarnings()
+names(s_counts_median_months) <- "median counts"
+attr(s_counts_median_months, "units") <- "count"
+attr(s_counts_median_months, "description") <- "median counts of individuals per month"
+
+### PREDICTIONS
+
+s_predictions_inside_owf_median_months <- stars::st_as_stars(predictions_inside_owf_median_months) %>% suppressWarnings()
+names(s_predictions_inside_owf_median_months) <- "median predicted counts"
+attr(s_predictions_inside_owf_median_months, "units") <- "count"
+attr(s_predictions_inside_owf_median_months, "description") <- "median predicted counts of individuals per month, data from inside owf"
+
+s_predictions_outside_owf_median_months <- stars::st_as_stars(predictions_outside_owf_median_months) %>% suppressWarnings()
+names(s_predictions_outside_owf_median_months) <- "median predicted counts"
+attr(s_predictions_outside_owf_median_months, "units") <- "count"
+attr(s_predictions_outside_owf_median_months, "description") <- "median predicted counts of individuals per month, data from outside owf"
+
+s_diff_owf <- stars::st_as_stars(diff_owf) %>% suppressWarnings()
+names(s_diff_owf) <- "difference in median predicted counts"
+attr(s_diff_owf, "units") <- "count"
+attr(s_diff_owf, "description") <- "difference median predicted counts of individuals per month, based on models trained with data from inside/outside owf"
 
 
+## ----3. save stars obj as netCDF -------------------------------------------------------------------------
 
-## ----load model for inside OWF-------------------------------------------------------------------------
+nc_file <- file.path(processed_dir, "test_s3.nc")
+write_stars(raster, nc_file)  #, options = c("COMPRESS=4") # optional compression
+
+# STOPPED HERE 20260109, 12:43pm. TODO: write function save_as_s3() that combines all steps (making the stars obj, saving it, and exporting to s3)
 
 # Create raster
 values <- sample(0:10, size = 100, replace = TRUE)

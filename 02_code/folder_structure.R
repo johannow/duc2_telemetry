@@ -6,6 +6,7 @@ mod_dir  <- file.path("04_results", "01_models")
 pred_dir  <- file.path("04_results", "02_predictions")
 # plot_dir  <- file.path("04_results", "03_plots")
 aggregations_dir  <- file.path("04_results", "03_monthly_aggregations")
+s3_dir  <- file.path("04_results", "04_s3_objects")
 
 folder_struct <- c(raw_dir,
                  processed_dir,
@@ -14,7 +15,8 @@ folder_struct <- c(raw_dir,
                  mod_dir,
                  pred_dir,
                  # plot_dir,
-                 aggregations_dir)
+                 aggregations_dir,
+                 s3_dir)
 
 
 # #Check for their existence, create if missing
