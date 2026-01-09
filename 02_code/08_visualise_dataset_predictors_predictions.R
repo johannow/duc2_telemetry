@@ -35,8 +35,10 @@ dates <- seq.Date(from = as.Date(start), to = as.Date(end), by = "day")
 ## ----1. load predictors-------------------------------------------------------------------------
 bathy <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
 habitats <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
-lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
-lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
+# lat
+y_m_4326 <- terra::rast(file.path(processed_dir,"y_m_4326.nc"))
+#lon
+x_m_4326 <- terra::rast(file.path(processed_dir,"x_m_4326.nc"))
 lod <- terra::rast(file.path(processed_dir, "lod_rast.nc"))
 # define the time for time-variant predictors layers
 time(lod) <- dates
@@ -70,6 +72,16 @@ aggregate_save_raster(raster_obj = habitats,
 aggregate_save_raster(raster_obj = owf_dist,
                       aggregate = F,
                       varname = "min_dist_to_owf",
+                      dir = predictors_plots_dir)
+
+aggregate_save_raster(raster_obj = y_m_4326,
+                      aggregate = F,
+                      varname = "y_m",
+                      dir = predictors_plots_dir)
+
+aggregate_save_raster(raster_obj = x_m_4326,
+                      aggregate = F,
+                      varname = "x_m",
                       dir = predictors_plots_dir)
 
 predictors_monthly_dir <- file.path(aggregations_dir, "predictors_monthly")
@@ -119,7 +131,7 @@ chunk01_vect <- vect(chunk01_monthly)
 chunk01_monthly_rasters <- chunk01_monthly %>%
   distinct(year_month) %>%
   pull(year_month) %>%
-  set_names() %>%
+  purrr::set_names() %>%
   purrr::map(~ {
     v <- chunk01_vect[chunk01_vect$year_month == .x, ]
     
@@ -156,11 +168,17 @@ chunk01_monthly_rasters_stack <- terra::rast(chunk01_monthly_rasters)
 
 suppressWarnings( # suppress warning about there being no time dimension
 terra::writeCDF(x = chunk01_monthly_rasters_stack,
-                filename = file.path(data_monthly_dir,"median_counts_monthly.nc"),
+                filename = file.path(data_monthly_dir,"median_counts_monthyear.nc"),
                 varname = "median count",
                 overwrite = TRUE)
 )
 
+nlyr(chunk01_monthly_rasters_stack) # still >12 lyr, so we will aggregate per month (neglecting the yr)
+time(chunk01_monthly_rasters_stack) <- names(chunk01_monthly_rasters_stack) %>% as.Date()
+monthly_median_counts <- aggregate_save_raster(raster_obj = chunk01_monthly_rasters_stack,
+                                               varname = "median count",
+                                               filename = "chunk01_counts",
+                                               dir = data_monthly_dir)
 
 ## ----3. load predictions -------------------------------------------------------------------------
 predictions_inside_owf <- terra::rast(file.path(pred_dir, "predictions_inside_owf.nc"))

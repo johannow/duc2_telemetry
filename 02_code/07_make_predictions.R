@@ -63,8 +63,12 @@ model_outsideOWF <- readRDS(selected_model_path2)
 ## ----load prediction rasters-------------------------------------------------------------------------
 bathy <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
 habitats <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
-lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
-lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
+# lat
+y_m_4326 <- terra::rast(file.path(processed_dir,"y_m_4326.nc"))
+#lon
+x_m_4326 <- terra::rast(file.path(processed_dir,"x_m_4326.nc"))
+# lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
+# lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
 lod <- terra::rast(file.path(processed_dir, "lod_rast.nc"))
 time(lod) <- dates
 owf_dist <- terra::rast(file.path(processed_dir, "OWF_dist_rast.nc"))
