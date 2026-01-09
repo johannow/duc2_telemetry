@@ -27,10 +27,41 @@ list.files(func_dir, pattern = "\\.R$", full.names = TRUE) |>
   purrr::walk(source)
 
 ## ----parameters----------------------------------------------------------------
-# start <- "2021-01-01"
-# end <- "2022-12-31"
-# # Create sequence of dates
-# dates <- seq.Date(from = as.Date(start), to = as.Date(end), by = "day")
+start <- "2021-01-01"
+end <- "2022-12-31"
+# Create sequence of dates
+dates <- seq.Date(from = as.Date(start), to = as.Date(end), by = "day")
+
+## ----1. load (monthly aggregated) raster layers-------------------------------------------------------------------------
+### PREDICTORS ###
+# time-invariant rasters are stored in 01_data/02_processed_data
+constant_predictors_dir <- processed_dir
+
+bathy <- terra::rast(file.path(constant_predictors_dir, "bathy_rast.nc"))
+habitats <- terra::rast(file.path(constant_predictors_dir, "habitats_rast.tif"))
+owf_dist <- terra::rast(file.path(constant_predictors_dir, "OWF_dist_rast.nc"))
+shipwreck_dist <- terra::rast(file.path(constant_predictors_dir, "shipwreck_dist_rast.nc"))
+# lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
+# lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
+
+# per-month aggregated layers of time-variant rasters are stored in the aggregations_dir
+predictors_monthly_dir <- file.path(aggregations_dir, "predictors_monthly")
+
+lod_median_months <- terra::rast(file.path(predictors_monthly_dir, "lod_median_months.nc"))
+sst_median_months <- terra::rast(file.path(predictors_monthly_dir, "sst_median_months.nc"))
+n_active_tags_median_months <- terra::rast(file.path(predictors_monthly_dir, "n_active_tags_median_months.nc"))
+
+### ACOUSTIC TELEMETRY DATA ###
+data_monthly_dir <- file.path(aggregations_dir, "median_counts_monthly")
+
+### PREDICTIONS ###
+predictions_monthly_dir <- file.path(aggregations_dir, "predictions_monthly")
+
+predictions_inside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_inside_owf_median_months.nc"))
+predictions_outside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_inside_owf_median_months.nc"))
+predictions_inside_owf_median_months <- terra::rast(file.path(predictions_monthly_dir, "predictions_inside_owf_median_months.nc"))
+
+
 
 ## ----load model for inside OWF-------------------------------------------------------------------------
 

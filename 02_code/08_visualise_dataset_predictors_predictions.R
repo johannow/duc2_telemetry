@@ -48,8 +48,7 @@ n_active_tags <- terra::rast(file.path(processed_dir, "n_active_tags_rast.nc"))
 time(n_active_tags) <- dates
 
 ### save predictor raster plots
-predictors_plots_dir <- file.path(processed_dir, "predictors_plots")
-if (!dir.exists(predictors_plots_dir)) dir.create(predictors_plots_dir)
+predictors_plots_dir <- processed_dir
 
 #### temporally constant predictors
 
@@ -73,23 +72,25 @@ aggregate_save_raster(raster_obj = owf_dist,
                       varname = "min_dist_to_owf",
                       dir = predictors_plots_dir)
 
+predictors_monthly_dir <- file.path(aggregations_dir, "predictors_monthly")
+if (!dir.exists(predictors_monthly_dir)) dir.create(predictors_monthly_dir)
 
 ## aggregate time-variant predictors 
 sst_monthly_median <- 
   aggregate_save_raster(raster_obj = sst,
                         varname = "sst",
                         aggregate = T,
-                        dir = predictors_plots_dir)
+                        dir = predictors_monthly_dir)
 
 lod_monthly_median <- 
   aggregate_save_raster(raster_obj = lod,
                         varname = "lod",
-                        dir = predictors_plots_dir)
+                        dir = predictors_monthly_dir)
 
 n_active_tags <- 
   aggregate_save_raster(raster_obj = n_active_tags,
                         varname = "n_active_tags",
-                        dir = predictors_plots_dir)
+                        dir = predictors_monthly_dir)
 
 
 ## ----2. load dataset-------------------------------------------------------------------------
@@ -190,6 +191,14 @@ outside_owf_monthly_median <-
                         model_info = selected_model_name2,
                         varname = "monthly predicted count",
                         dir = predictions_monthly_dir)
+
+diff_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = diff_owf,
+                        model_info = "difference of inside and outside OWF pred, model4",
+                        varname = "difference in monthly predicted count",
+                        dir = predictions_monthly_dir,
+                        filename = "output_chunk07_diffOWF",
+                        range = NULL)
 
 # owf_zero_monthly_median <- 
 #   aggregate_save_raster(raster_obj = predictions_owf_zero,

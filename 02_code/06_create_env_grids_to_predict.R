@@ -41,30 +41,51 @@ OWF <- sf::st_read(file.path(processed_dir, "OWF.gpkg"))
 BPNS <- sf::st_read(file.path(raw_dir, "BPNS.gpkg"))
 
 ## ----lonlat-rasters-----------------------------------------------------------
-r <- sst_daily[[1]] #thetao raster to have same resolution, ncells etc.
 
-# Get cell numbers
-cells <- 1:terra::ncell(r)
+## Explanation: we need raster layers in cRS 4326 but with values that represent the lat/lon in metres (for accurate predictions)
+# 1. reference raster in EPSG:4326
+r_4326 <- bathy
 
-# Get longitude and latitude values for each cell
-long_vals <- terra::xFromCell(r, cells)
-lat_vals <- terra::yFromCell(r, cells)
+# 2. project grid to EPSG:3035
+r_3035 <- terra::project(r_4326, "EPSG:3035")
 
-# Create new rasters for longitude and latitude
-lon_raster <- setValues(rast(r), long_vals)
-lon_raster <- terra::mask(lon_raster, vect(BPNS))
-names(lon_raster) <- "Longitude"
-varnames(lon_raster) <- "Longitude"
+# 3. create projected coordinates (meters)
+x_m_3035 <- init(r_3035, "x")
+y_m_3035 <- init(r_3035, "y")
 
-lat_raster <- setValues(rast(r), lat_vals)
-lat_raster <- terra::mask(lat_raster, vect(BPNS))
-names(lat_raster) <- "Latitude"
-varnames(lat_raster) <- "Latitude"
+# test_y <- bathy %>% project("EPSG:3035") %>% init("y") %>% mask(shipwreck_dist)
+# test_x <- bathy %>% project("EPSG:3035") %>% init("x") %>% mask(shipwreck_dist)
+
+# 4. project values back to 4326 grid
+x_m_4326 <- project(x_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
+y_m_4326 <- project(y_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
+
+## OLD
+# r <- sst_daily[[1]] #thetao raster to have same resolution, ncells etc.
+# 
+# # Get cell numbers
+# cells <- 1:terra::ncell(r)
+# 
+# # Get longitude and latitude values for each cell
+# long_vals <- terra::xFromCell(r, cells)
+# lat_vals <- terra::yFromCell(r, cells)
+# 
+# # Create new rasters for longitude and latitude
+# lon_raster <- setValues(rast(r), long_vals)
+# lon_raster <- terra::mask(lon_raster, vect(BPNS))
+# names(lon_raster) <- "Longitude"
+# varnames(lon_raster) <- "Longitude"
+# 
+# lat_raster <- setValues(rast(r), lat_vals)
+# lat_raster <- terra::mask(lat_raster, vect(BPNS))
+# names(lat_raster) <- "Latitude"
+# varnames(lat_raster) <- "Latitude"
+
+# # Plot
+# terra::plot(lon_raster, main = "Longitude")
+# terra::plot(lat_raster, main = "Latitude")
 
 
-# Plot
-terra::plot(lon_raster, main = "Longitude")
-terra::plot(lat_raster, main = "Latitude")
 
 ## ----distance-rasters---------------------------------------------------------
 OWF_dist_rast <- terra::distance(r, OWF)
@@ -136,9 +157,11 @@ n_active_tags_rast <- terra::mask(n_active_tags_rast, r)
 
 ## ----write-results------------------------------------------------------------
 #lat
-terra::writeCDF(lat_raster, file.path(processed_dir,"lat_rast.nc"), varname = "lat", overwrite = TRUE)
+terra::writeCDF(y_m_4326, file.path(processed_dir,"y_m_4326.nc"), varname = "y_m", overwrite = TRUE)
+# terra::writeCDF(lat_raster, file.path(processed_dir,"lat_rast.nc"), varname = "lat", overwrite = TRUE)
 #lon
-terra::writeCDF(lon_raster, file.path(processed_dir,"lon_rast.nc"), varname = "lon", overwrite = TRUE)
+terra::writeCDF(x_m_4326, file.path(processed_dir,"x_m_4326.nc"), varname = "x_m", overwrite = TRUE)
+# terra::writeCDF(lon_raster, file.path(processed_dir,"lon_rast.nc"), varname = "lon", overwrite = TRUE)
 #distance to shipwreck
 terra::writeCDF(shipwreck_dist_rast, file.path(processed_dir,"shipwreck_dist_rast.nc"), varname = "distance_to_shipwreck", overwrite = TRUE)
 #distance to OWF

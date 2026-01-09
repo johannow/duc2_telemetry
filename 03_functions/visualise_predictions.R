@@ -50,7 +50,8 @@ aggregate_save_raster <- function(raster_obj,
                                   dir = aggregations_dir,
                                   model_info = "",
                                   filename = NULL,
-                                  range = NULL) {
+                                  range = NULL,
+                                  plot_type = NULL) {
 
    # 1. aggregate 
   if(aggregate){

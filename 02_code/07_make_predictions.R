@@ -65,13 +65,6 @@ bathy <- terra::rast(file.path(processed_dir, "bathy_rast.nc"))
 habitats <- terra::rast(file.path(processed_dir, "habitats_rast.tif"))
 lat <- terra::rast(file.path(processed_dir, "lat_rast.nc"))
 lon <- terra::rast(file.path(processed_dir, "lon_rast.nc"))
-x_m <- lon
-values(x_m) <- values(init(project(lon, "EPSG:3035"), "x"))
-# x_m <- project(lon, "EPSG:3035") # transform to m
-# crs(x_m)
-# res(x_m)  # now in meters
-y_m <- project(lat, "EPSG:3035") # transform to m
-
 lod <- terra::rast(file.path(processed_dir, "lod_rast.nc"))
 time(lod) <- dates
 owf_dist <- terra::rast(file.path(processed_dir, "OWF_dist_rast.nc"))
@@ -88,24 +81,23 @@ chunk03 <- readRDS(file.path(processed_dir, "output_chunk03.rds"))
 ##----resample relevant raster layers------------------------------------------------------------------
 bathy <- terra::resample(bathy, sst) #need to align to allow predictions
 
-# 1. reference raster in EPSG:4326
-r_4326 <- bathy
+# # 1. reference raster in EPSG:4326
+# r_4326 <- bathy
+# 
+# # 2. project grid to EPSG:3035
+# r_3035 <- project(r_4326, "EPSG:3035")
+# 
+# # 3. create projected coordinates (meters)
+# x_m_3035 <- init(r_3035, "x")
+# y_m_3035 <- init(r_3035, "y")
+# 
+# # test_y <- bathy %>% project("EPSG:3035") %>% init("y") %>% mask(shipwreck_dist)
+# # test_x <- bathy %>% project("EPSG:3035") %>% init("x") %>% mask(shipwreck_dist)
+# 
+# # 4. project values back to 4326 grid
+# x_m_4326 <- project(x_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
+# y_m_4326 <- project(y_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
 
-# 2. project grid to EPSG:3035
-r_3035 <- project(r_4326, "EPSG:3035")
-
-# 3. create projected coordinates (meters)
-x_m_3035 <- init(r_3035, "x")
-y_m_3035 <- init(r_3035, "y")
-
-test_y <- bathy %>% project("EPSG:3035") %>% init("y") %>% mask(shipwreck_dist)
-test_x <- bathy %>% project("EPSG:3035") %>% init("x") %>% mask(shipwreck_dist)
-
-# 4. project values back to 4326 grid
-x_m_4326 <- project(x_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
-y_m_4326 <- project(y_m_3035, r_4326, method = "near") %>% mask(shipwreck_dist)
-
-ext(sst[[1]]) == ext(y_m_4326)
 
 # x_m <- rasterize(
 #   vect(chunk03),
@@ -149,7 +141,7 @@ for(i in 1:nlyr(sst)){
   names(predictors) <- c("elevation", "sst", "lod", "min_dist_shipwreck", "y_m", "x_m", "n_active_tags")
  
   # Predict
-  predictions_inside_owf[[i]] <- terra::predict(predictors, model = model_insideOWF)
+  predictions_inside_owf[[i]] <- terra::predict(predictors, model = model_insideOWF, type = "response")
 }
 
 predictions_inside_owf <- terra::rast(predictions_inside_owf)
@@ -165,14 +157,15 @@ for(i in 1:nlyr(sst)){
   names(predictors) <- c("elevation", "sst", "lod", "min_dist_shipwreck", "y_m", "x_m", "n_active_tags")
  
   # Predict
-  predictions_outside_owf[[i]] <- terra::predict(predictors, model = model_outsideOWF)
+  predictions_outside_owf[[i]] <- terra::predict(predictors, model = model_outsideOWF, type = "response")
 }
 
 predictions_outside_owf <- terra::rast(predictions_outside_owf)
 time(predictions_outside_owf) <- dates
 names(predictions_outside_owf) <- dates %>% as.character()
 
-
+# plot(predictions_outside_owf[[50]], range = c(0, 1))
+# plot(predictions_inside_owf[[150]], range = c(0, 0.5))
 # old: with layers of OWF == 1 and OWF == 0
 # predictions_owf_one <- list()
 # predictions_owf_zero <- list()
@@ -221,37 +214,7 @@ names(predictions_outside_owf) <- dates %>% as.character()
 # time(predictions_owf_dist) <- dates
 # names(predictions_owf_dist) <- dates %>% as.character()
 
-# write prediction files -------------------------------------------------------------
-terra::writeCDF(x = predictions_inside_owf,
-                filename = file.path(pred_dir,"predictions_inside_owf.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
-terra::writeCDF(x = predictions_outside_owf,
-                filename = file.path(pred_dir,"predictions_outside_owf.nc"),
-                varname = "predicted count",
-                overwrite = TRUE)
-## aggregate per month and write file
-
-inside_owf_monthly_median <- 
-  aggregate_save_raster(raster_obj = predictions_inside_owf,
-                        model_info = selected_model_name1,
-                        varname = "monthly predicted count",
-                        dir = processed_dir,
-                        filename = "output_chunk07_insideOWF",
-                        range = c(-100, 0))
-
-outside_owf_monthly_median <- 
-  aggregate_save_raster(raster_obj = predictions_outside_owf,
-                        model_info = selected_model_name2,
-                        varname = "monthly predicted count",
-                        dir = processed_dir,
-                        filename = "output_chunk07_outsideOWF",
-                        range = c(-100, 0))
-
-
 # calculate the difference in predictions from inside to outside ----------
-
-# approach 1: calculate diff and then aggregate
 
 diff_owf <- predictions_inside_owf - predictions_outside_owf
 diff_owf_monthly_median <- 
@@ -261,6 +224,41 @@ diff_owf_monthly_median <-
                         dir = processed_dir,
                         filename = "output_chunk07_diffOWF",
                         range = NULL)
+
+# write prediction files -------------------------------------------------------------
+terra::writeCDF(x = predictions_inside_owf,
+                filename = file.path(pred_dir,"predictions_inside_owf.nc"),
+                varname = "predicted count",
+                overwrite = TRUE)
+terra::writeCDF(x = predictions_outside_owf,
+                filename = file.path(pred_dir,"predictions_outside_owf.nc"),
+                varname = "predicted count",
+                overwrite = TRUE)
+terra::writeCDF(x = diff_owf,
+                filename = file.path(pred_dir,"predictions_outside_owf.nc"),
+                varname = "difference in predicted count",
+                overwrite = TRUE)
+
+## aggregate per month and write file
+
+inside_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = predictions_inside_owf,
+                        model_info = selected_model_name1,
+                        varname = "monthly predicted count",
+                        dir = processed_dir,
+                        filename = "output_chunk07_insideOWF",
+                        range = c(0, 10))
+
+outside_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = predictions_outside_owf,
+                        model_info = selected_model_name2,
+                        varname = "monthly predicted count",
+                        dir = processed_dir,
+                        filename = "output_chunk07_outsideOWF",
+                        range = c(0, 10))
+
+
+diff_owf2 <- inside_owf_monthly_median - outside_owf_monthly_median
 
 # # old
 # terra::writeCDF(x = predictions_owf_one,
