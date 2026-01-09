@@ -251,10 +251,17 @@ outside_owf_monthly_median <-
 
 # calculate the difference in predictions from inside to outside ----------
 
+# approach 1: calculate diff and then aggregate
 
-# approach 2: calculate difference from the aggregated predictions
-diff_owf_outside_inside <- inside_owf_monthly_median - outside_owf_monthly_median
-plot(diff_owf_outside_inside)
+diff_owf <- predictions_inside_owf - predictions_outside_owf
+diff_owf_monthly_median <- 
+  aggregate_save_raster(raster_obj = diff_owf,
+                        model_info = "difference of inside and outside OWF pred, model4",
+                        varname = "difference in monthly predicted count",
+                        dir = processed_dir,
+                        filename = "output_chunk07_diffOWF",
+                        range = NULL)
+
 # # old
 # terra::writeCDF(x = predictions_owf_one,
 #                 filename = file.path(pred_dir,"predictions_owf_one.nc"),
