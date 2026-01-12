@@ -21,10 +21,13 @@ library(dplyr)
 library(terra)
 library(stars)
 library(paws)
+library(tidyverse)
 
 ## ----load-functions----------------------------------------------------------------
 list.files(func_dir, pattern = "\\.R$", full.names = TRUE) |>
   purrr::walk(source)
+
+message("⚠️ Attention! Be sure to update your env variables from this website (https://datalab.dive.edito.eu/account/storage) in the .Renviron file, they expire after 24h.")
 
 ## ----parameters----------------------------------------------------------------
 start <- "2021-01-01"
@@ -72,146 +75,166 @@ terra::writeCDF(x = diff_owf,
                 varname = "difference in predicted count",
                 overwrite = TRUE) %>% suppressWarnings()
 
-## ----2. convert raster layers into stars obj -------------------------------------------------------------------------
+
+## ----2. export layer as s3 ------------------------------------------------------
 
 ### PREDICTORS ####
-s_bathy <- stars::st_as_stars(bathy)
-names(s_bathy) <- "elevation"
-attr(s_bathy, "units") <- "m"
-attr(s_bathy, "description") <- "bathymetry of the Belgian Part of the North Sea"
+# old - from before the function was written - keeping just in case, delete later
+# s_bathy <- stars::st_as_stars(bathy)
+# names(s_bathy) <- "elevation"
+# attr(s_bathy, "units") <- "m"
+# attr(s_bathy, "description") <- "bathymetry of the Belgian Part of the North Sea"
 
-s_habitats <- stars::st_as_stars(habitats)
-names(s_habitats) <- "habitat category"
-attr(s_habitats, "units") <- ""
-attr(s_habitats, "description") <- "seabed habitat categories of the Belgian Part of the North Sea"
+export_layer_as_s3(layer = bathy,
+                   layer_name = "elevation",
+                   layer_units = "m",
+                   layer_description = "bathymetry of the Belgian Part of the North Sea",
+                   dir = s3_dir)
 
-s_owf_dist <- stars::st_as_stars(owf_dist)
-names(s_owf_dist) <- "distance to closest offshore wind farm"
-attr(s_owf_dist, "units") <- "m"
-attr(s_owf_dist, "description") <- "distance to closest owf in the Belgian Part of the North Sea"
+# s_habitats <- stars::st_as_stars(habitats)
+# names(s_habitats) <- "habitat category"
+# attr(s_habitats, "units") <- ""
+# attr(s_habitats, "description") <- "seabed habitat categories of the Belgian Part of the North Sea"
 
-s_shipwreck_dist <- stars::st_as_stars(shipwreck_dist)
-names(s_shipwreck_dist) <- "distance to closest shipwreck"
-attr(s_shipwreck_dist, "units") <- "m"
-attr(s_shipwreck_dist, "description") <- "distance to closest shipwreck in the Belgian Part of the North Sea"
+export_layer_as_s3(layer = habitats,
+                   layer_name = "habitat category",
+                   layer_units = "",
+                   layer_description = "seabed habitat categories of the Belgian Part of the North Sea",
+                   dir = s3_dir)
 
-s_y_m_4326 <- stars::st_as_stars(y_m_4326)
-names(s_y_m_4326) <- "Latitude"
-attr(s_y_m_4326, "units") <- "m"
-attr(s_y_m_4326, "description") <- "Latitude in EPSG:3035"
+# s_owf_dist <- stars::st_as_stars(owf_dist)
+# names(s_owf_dist) <- "distance to closest offshore wind farm"
+# attr(s_owf_dist, "units") <- "m"
+# attr(s_owf_dist, "description") <- "distance to closest owf in the Belgian Part of the North Sea"
 
-s_x_m_4326 <- stars::st_as_stars(x_m_4326)
-names(s_x_m_4326) <- "Longitude"
-attr(s_x_m_4326, "units") <- "m"
-attr(s_x_m_4326, "description") <- "Longitude in EPSG:3035"
+export_layer_as_s3(layer = owf_dist,
+                   layer_name = "distance to closest offshore wind farm",
+                   layer_units = "m",
+                   layer_description = "distance to closest owf in the Belgian Part of the North Sea",
+                   dir = s3_dir)
 
-s_lod_median_months <- stars::st_as_stars(lod_median_months) %>% suppressWarnings()
-names(s_lod_median_months) <- "median lod"
-attr(s_lod_median_months, "units") <- "h"
-attr(s_lod_median_months, "description") <- "median lod per month"
+# s_shipwreck_dist <- stars::st_as_stars(shipwreck_dist)
+# names(s_shipwreck_dist) <- "distance to closest shipwreck"
+# attr(s_shipwreck_dist, "units") <- "m"
+# attr(s_shipwreck_dist, "description") <- "distance to closest shipwreck in the Belgian Part of the North Sea"
 
-s_sst_median_months <- stars::st_as_stars(sst_median_months) %>% suppressWarnings()
-names(s_sst_median_months) <- "median sst"
-attr(s_sst_median_months, "units") <- "Degree Celcius"
-attr(s_sst_median_months, "description") <- "median sst per month"
+export_layer_as_s3(layer = shipwreck_dist,
+                   layer_name = "distance to closest shipwreck",
+                   layer_units = "m",
+                   layer_description = "distance to closest shipwreck in the Belgian Part of the North Sea",
+                   dir = s3_dir)
 
-s_n_active_tags_median_months <- stars::st_as_stars(n_active_tags_median_months) %>% suppressWarnings()
-names(s_n_active_tags_median_months) <- "median n_active_tags"
-attr(s_n_active_tags_median_months, "units") <- "count"
-attr(s_n_active_tags_median_months, "description") <- "median number of active acoustic transmitters per month"
+# s_y_m_4326 <- stars::st_as_stars(y_m_4326)
+# names(s_y_m_4326) <- "Latitude"
+# attr(s_y_m_4326, "units") <- "m"
+# attr(s_y_m_4326, "description") <- "Latitude in EPSG:3035"
+
+export_layer_as_s3(layer = y_m_4326,
+                   layer_name = "Latitude",
+                   layer_units = "m",
+                   layer_description = "Latitude in EPSG:3035",
+                   dir = s3_dir)
+
+# s_x_m_4326 <- stars::st_as_stars(x_m_4326)
+# names(s_x_m_4326) <- "Longitude"
+# attr(s_x_m_4326, "units") <- "m"
+# attr(s_x_m_4326, "description") <- "Longitude in EPSG:3035"
+
+export_layer_as_s3(layer = x_m_4326,
+                   layer_name = "Longitude",
+                   layer_units = "m",
+                   layer_description = "Longitude in EPSG:3035",
+                   dir = s3_dir)
+
+# s_lod_median_months <- stars::st_as_stars(lod_median_months) %>% suppressWarnings()
+# names(s_lod_median_months) <- "median lod"
+# attr(s_lod_median_months, "units") <- "h"
+# attr(s_lod_median_months, "description") <- "median lod per month"
+
+export_layer_as_s3(layer = lod_median_months,
+                   layer_name = "median lod",
+                   layer_units = "h",
+                   layer_description = "median lod per month",
+                   dir = s3_dir)
+
+# s_sst_median_months <- stars::st_as_stars(sst_median_months) %>% suppressWarnings()
+# names(s_sst_median_months) <- "median sst"
+# attr(s_sst_median_months, "units") <- "Degree Celcius"
+# attr(s_sst_median_months, "description") <- "median sst per month"
+
+export_layer_as_s3(layer = sst_median_months,
+                   layer_name = "median sst",
+                   layer_units = "Degree Celcius",
+                   layer_description = "median sst per month",
+                   dir = s3_dir)
+
+# s_n_active_tags_median_months <- stars::st_as_stars(n_active_tags_median_months) %>% suppressWarnings()
+# names(s_n_active_tags_median_months) <- "median n_active_tags"
+# attr(s_n_active_tags_median_months, "units") <- "count"
+# attr(s_n_active_tags_median_months, "description") <- "median number of active acoustic transmitters per month"
+
+export_layer_as_s3(layer = n_active_tags_median_months,
+                   layer_name = "median n_active_tags",
+                   layer_units = "count",
+                   layer_description = "median number of active acoustic transmitters per month",
+                   dir = s3_dir)
 
 ### DATA ###
-s_counts_median_months <- stars::st_as_stars(counts_median_months) %>% suppressWarnings()
-names(s_counts_median_months) <- "median counts"
-attr(s_counts_median_months, "units") <- "count"
-attr(s_counts_median_months, "description") <- "median counts of individuals per month"
+# s_counts_median_months <- stars::st_as_stars(counts_median_months) %>% suppressWarnings()
+# names(s_counts_median_months) <- "median counts"
+# attr(s_counts_median_months, "units") <- "count"
+# attr(s_counts_median_months, "description") <- "median counts of individuals per month"
+
+export_layer_as_s3(layer = counts_median_months,
+                   layer_name = "median counts",
+                   layer_units = "count",
+                   layer_description = "median counts of individuals per month",
+                   dir = s3_dir)
 
 ### PREDICTIONS
 
-s_predictions_inside_owf_median_months <- stars::st_as_stars(predictions_inside_owf_median_months) %>% suppressWarnings()
-names(s_predictions_inside_owf_median_months) <- "median predicted counts"
-attr(s_predictions_inside_owf_median_months, "units") <- "count"
-attr(s_predictions_inside_owf_median_months, "description") <- "median predicted counts of individuals per month, data from inside owf"
+# s_predictions_inside_owf_median_months <- stars::st_as_stars(predictions_inside_owf_median_months) %>% suppressWarnings()
+# names(s_predictions_inside_owf_median_months) <- "median predicted counts"
+# attr(s_predictions_inside_owf_median_months, "units") <- "count"
+# attr(s_predictions_inside_owf_median_months, "description") <- "median predicted counts of individuals per month, data from inside owf"
 
-s_predictions_outside_owf_median_months <- stars::st_as_stars(predictions_outside_owf_median_months) %>% suppressWarnings()
-names(s_predictions_outside_owf_median_months) <- "median predicted counts"
-attr(s_predictions_outside_owf_median_months, "units") <- "count"
-attr(s_predictions_outside_owf_median_months, "description") <- "median predicted counts of individuals per month, data from outside owf"
+export_layer_as_s3(layer = predictions_inside_owf_median_months,
+                   layer_name = "median predicted counts",
+                   layer_units = "count",
+                   layer_description = "median predicted counts of individuals per month, data from inside owf",
+                   dir = s3_dir)
 
-s_diff_owf <- stars::st_as_stars(diff_owf) %>% suppressWarnings()
-names(s_diff_owf) <- "difference in median predicted counts"
-attr(s_diff_owf, "units") <- "count"
-attr(s_diff_owf, "description") <- "difference median predicted counts of individuals per month, based on models trained with data from inside/outside owf"
+# s_predictions_outside_owf_median_months <- stars::st_as_stars(predictions_outside_owf_median_months) %>% suppressWarnings()
+# names(s_predictions_outside_owf_median_months) <- "median predicted counts"
+# attr(s_predictions_outside_owf_median_months, "units") <- "count"
+# attr(s_predictions_outside_owf_median_months, "description") <- "median predicted counts of individuals per month, data from outside owf"
+
+export_layer_as_s3(layer = predictions_outside_owf_median_months,
+                   layer_name = "median predicted counts",
+                   layer_units = "count",
+                   layer_description = "median predicted counts of individuals per month, data from outside owf",
+                   dir = s3_dir)
+
+# s_diff_owf <- stars::st_as_stars(diff_owf) %>% suppressWarnings()
+# names(s_diff_owf) <- "difference in median predicted counts"
+# attr(s_diff_owf, "units") <- "count"
+# attr(s_diff_owf, "description") <- "difference median predicted counts of individuals per month, based on models trained with data from inside/outside owf"
+
+export_layer_as_s3(layer = diff_owf,
+                   layer_name = "difference in median predicted counts",
+                   layer_units = "count",
+                   layer_description = "difference median predicted counts of individuals per month, based on models trained with data from inside/outside owf",
+                   dir = s3_dir)
 
 
-## ----3. save stars obj as netCDF -------------------------------------------------------------------------
+## ----3. save list with all s3 obj links ------------------------------------------------------
 
-nc_file <- file.path(processed_dir, "test_s3.nc")
-write_stars(raster, nc_file)  #, options = c("COMPRESS=4") # optional compression
+s3_obj_list <- list.files(s3_dir, pattern = "\\.nc$", full.names = TRUE) %>%
+  basename()
 
-# STOPPED HERE 20260109, 12:43pm. TODO: write function save_as_s3() that combines all steps (making the stars obj, saving it, and exporting to s3)
+prefix <- paste0("https://", Sys.getenv("AWS_S3_ENDPOINT"))
 
-# Create raster
-values <- sample(0:10, size = 100, replace = TRUE)
-
-r <- rast(
-  nrows = 10,
-  ncols = 10,
-  xmin = 0,
-  xmax = 10,
-  ymin = 50,
-  ymax = 60,
-  crs = "EPSG:4326"
-)
-values(r) <- values
-
-# Convert to stars object
-raster <- stars::st_as_stars(r)
-names(raster) <- "random_raster"
-attr(raster, "units") <- "arbitrary"
-attr(raster, "description") <- "Random 10x10 raster covering 0–10E, 50–60N"
-
-# ---- Save as NetCDF ----
-nc_file <- file.path(processed_dir, "test_s3.nc")
-write_stars(raster, nc_file)  #, options = c("COMPRESS=4") # optional compression
-
-# ---- Configure MinIO/S3 ----
-# save the credentials from edito (accessible via https://datalab.dive.edito.eu/account/storage) in an .Renviron file inside 
-# repository's main directory ("~/duc2_telemetry/.Renviron")
-# Note that these credentials are valid for 24h at a time (the .Renviron content needs to be renewed every 24h). 
-# One you updated the .Renviron file contents, make sure to restart R. Otherwise, the .Renviron update won't come into effect
-# Sys.setenv(
-#   AWS_ACCESS_KEY_ID = "your info",
-#   AWS_SECRET_ACCESS_KEY = "your info",
-#   AWS_DEFAULT_REGION = "waw3-1",
-#   AWS_SESSION_TOKEN = "your info",
-#   AWS_S3_ENDPOINT = "minio.dive.edito.eu"
-# )
-
-# Initialize S3 client
-minio <- paws::s3(
-  config = list(
-    credentials = list(
-      creds = list(
-        access_key_id = Sys.getenv("AWS_ACCESS_KEY_ID"),
-        secret_access_key = Sys.getenv("AWS_SECRET_ACCESS_KEY"),
-        session_token = Sys.getenv("AWS_SESSION_TOKEN")
-      )
-    ),
-    endpoint = paste0("https://", Sys.getenv("AWS_S3_ENDPOINT")),
-    region = Sys.getenv("AWS_DEFAULT_REGION")
-  )
-)
-
-# ---- Upload NetCDF to S3 ----
-bucket_name <- Sys.getenv("bucket_name")  # Replace with your bucket
-object_key <- "test_s3.nc"   # Name in S3
-
-minio$put_object(
-  Bucket = bucket_name,
-  Key = object_key,
-  Body = nc_file
-)
-
-# Verify
-print(paste("Uploaded", nc_file, "to bucket", bucket_name))
+s3_obj_list  %>%
+  paste0(prefix, "/", .) %>%
+  # tibble(filename = .) %>%
+  readr::write_lines(file.path(s3_dir, "s3_links.csv"))

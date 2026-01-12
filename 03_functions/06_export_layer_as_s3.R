@@ -40,7 +40,7 @@ library(paws)
 export_layer_as_s3 <- function(layer, layer_name, layer_units, layer_description,
                                dir, filename = NULL, compress = FALSE, bucket_name = Sys.getenv("bucket_name")){
   # 1. convert into stars obj
-  s_layer <- stars::st_as_stars(layer)
+  s_layer <- stars::st_as_stars(layer) %>% suppressWarnings()
   names(s_layer) <- layer_name %>% as.character()
   attr(s_layer, "units") <- layer_units %>% as.character()
   attr(s_layer, "description") <- layer_description %>% as.character()
@@ -48,9 +48,11 @@ export_layer_as_s3 <- function(layer, layer_name, layer_units, layer_description
   # 2. write stars .nc file
   if(is.null(filename)){ #make the filename the name of the layer obj
     filename <- paste0(deparse(substitute(layer)), ".nc")
-  }
-  filename <- paste0(filename,".nc")
-  nc_dir <- file.path(processed_dir, filename)
+  }else{
+    filename <- paste0(filename,".nc")
+    }
+  
+  nc_dir <- file.path(dir, filename)
   
   if(isTRUE(compress)){
   write_stars(s_layer, nc_dir, options = c("COMPRESS=4")) # optional compression
